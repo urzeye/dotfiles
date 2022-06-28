@@ -1,0 +1,54 @@
+#!/bin/bash
+#
+# 依赖 glibc 2.18
+
+set -e
+
+need_glibc_version=2.18
+
+if ! command -v check_glibc_version >/dev/null 2>&1; then
+	. ~/.local/script/check_glibc_version.sh
+fi
+
+function judgeArch {
+	case $1 in
+	ar*) echo aarch64 ;;
+	amd* | x86*) echo x86_64 ;;
+	*) x86_64 ;;
+	esac
+}
+
+if [ -z "$DOWNLOAD_ARCH" ]; then
+	## 判定系统处理器架构
+	case $(uname -m) in
+	x86_64)
+		arch="x86_64"
+		;;
+	aarch64)
+		arch="aarch64"
+		;;
+	*)
+		arch=$(uname -m)
+		;;
+	esac
+	# 校验 glibc 版本
+	check_glibc_version $need_glibc_version
+else
+	arch=$(judgeArch ${DOWNLOAD_ARCH})
+fi
+version=v8.4.0
+file_name=fd-${version}-${arch}-unknown-linux-gnu.tar.gz
+url=https://github.com/sharkdp/fd/releases/download/${version}/${file_name}
+print "url: $url"
+
+# 下载并解压
+wget -qO - ${GITHUB_PROXY}${url} | tar zxf -
+# 可执行文件
+if [ -n "$DOWNLOAD_ARCH" ]; then
+	cp -f fd-v*/fd $DOWNLOAD
+	print "fd下载完成"
+else
+	mv fd-v*/fd ~/.local/bin
+	print "fd安装完成"
+fi
+rm -rf fd-v*/

@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+# vim一键安装脚本
+
+set -e
+
+# 获取当前时间
+function getTime {
+	echo $(date "+%Y-%m-%d %H:%M:%S.%N" | cut -c 1-23)
+}
+
+function print {
+	echo -e "\033[32m[$(getTime)] : $1\033[0m"
+}
+
+yum install -y vim && yum clean all ||
+	apk --no-cache add -f curl vim && rm -rf /var/cache/apk/* ||
+	apt-get install vim && rm -rf /var/cache/apt/archive/* ||
+	pacman -S --noconfirm vim
+if ! command -v vim >/dev/null 2>&1; then
+	print "vim安装失败，请手动安装vim"
+	exit 1
+else
+	print "vim安装成功"
+fi

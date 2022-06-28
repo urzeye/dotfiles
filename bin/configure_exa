@@ -1,0 +1,53 @@
+#!/bin/bash
+
+set -e
+
+function judgeArch {
+	case $1 in
+	armv7*) echo armv7 ;;
+	amd* | x86*) echo x86_64 ;;
+	*) ;;
+	esac
+}
+
+if [ -z "$DOWNLOAD_ARCH" ]; then
+	## 判定系统处理器架构
+	case $(uname -m) in
+	x86_64)
+		arch="x86_64"
+		;;
+	armv7*)
+		arch="armv7"
+		;;
+	*)
+		arch=$(uname -m)
+		;;
+	esac
+else
+	arch=$(judgeArch ${DOWNLOAD_ARCH})
+	if [ -z "$arch" ]; then
+		if [ "${DOWNLOAD_ARCH}" == "arm" ]; then
+			echo "exa 现仅支持 armv7 架构版本，其他 arm 版本可尝试自行编译"
+		else
+			echo "暂未完成该架构版本的自动下载"
+		fi
+		exit 0
+	fi
+fi
+version=v0.10.1
+file_name=exa-linux-${arch}-${version}.zip
+url=https://github.com/ogham/exa/releases/download/${version}/${file_name}
+print "url: $url"
+
+# 下载并解压
+wget -qO exa_.zip ${GITHUB_PROXY}${url}
+unzip -q exa_.zip -d exa_tmp/
+# 可执行文件
+if [ -n "$DOWNLOAD_ARCH" ]; then
+	cp -f exa_*/bin/exa $DOWNLOAD
+	print "exa下载完成"
+else
+	mv exa_*/bin/exa ~/.local/bin
+	print "exa安装完成"
+fi
+rm -rf exa_*

@@ -1,0 +1,51 @@
+#!/bin/bash
+#
+# aarch64需要自己编译，官方没有提供对应版本的 release
+
+set -e
+
+function judgeArch {
+	case $1 in
+	arm*) echo arm ;;
+	amd* | x86*) echo x86_64 ;;
+	*) ;;
+	esac
+}
+
+if [ -z "$DOWNLOAD_ARCH" ]; then
+	## 判定系统处理器架构
+	case $(uname -m) in
+	arm*) arch=arm ;;
+	amd* | x86*) arch=x86_64 ;;
+	*) ;;
+	esac
+else
+	arch=$(judgeArch ${DOWNLOAD_ARCH})
+	if [ "$arch" == "arm" ]; then
+		echo "ripgrep 现下载的为普通arm版，不支持 aarch64 架构，可尝试自行编译"
+	fi
+fi
+
+if [ "$arch" == "arm" ]; then
+	suffix=gnueabihf
+else
+	suffix=musl
+fi
+
+version=13.0.0
+file_name=ripgrep-${version}-${arch}-unknown-linux-${suffix}.tar.gz
+url=https://github.com/BurntSushi/ripgrep/releases/download/$version/$file_name
+print "ripgrep url: $url"
+
+# 下载并解压
+wget -qO - ${GITHUB_PROXY}${url} | tar zxf -
+# 可执行文件
+if [ -n "$DOWNLOAD_ARCH" ]; then
+	cp -f ripgrep*/rg $DOWNLOAD
+	print "ripgrep下载完成"
+else
+	mv ripgrep*/rg ~/.local/bin
+	print "ripgrep安装完成"
+fi
+
+rm -rf ripgrep*

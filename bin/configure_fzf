@@ -1,0 +1,53 @@
+#!/bin/bash
+
+set -e
+
+function judgeArch {
+	case $1 in
+	ar*) echo arm64 ;;
+	amd* | x86*) echo amd64 ;;
+	*) amd64 ;;
+	esac
+}
+
+if [ -z "$DOWNLOAD_ARCH" ]; then
+	## 判定系统处理器架构
+	case $(uname -m) in
+	x86_64)
+		arch="amd64"
+		;;
+	aarch64)
+		arch="arm64"
+		;;
+	armv7l)
+		arch="armv7"
+		;;
+	armv6l)
+		arch="armv6"
+		;;
+	*)
+		arch=$(uname -m)
+		;;
+	esac
+else
+	arch=$(judgeArch ${DOWNLOAD_ARCH})
+fi
+
+version=0.30.0
+file_name=fzf-${version}-Linux_${arch}.tar.gz
+url=https://github.com/junegunn/fzf/releases/download/${version}/${file_name}
+print "url: $url"
+
+# 下载并解压
+wget -qO - ${GITHUB_PROXY}${url} | tar zxf -
+# 可执行文件
+
+if [ -n "$DOWNLOAD_ARCH" ]; then
+	mv fzf $DOWNLOAD
+	print "fzf下载完成"
+else
+	if [ "$PWD" != "$HOME/.local/bin" ]; then
+		mv fzf ~/.local/bin
+	fi
+	print "fzf安装完成"
+fi

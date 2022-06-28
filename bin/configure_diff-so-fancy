@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -e
+
+version=v1.4.3
+url=https://github.com/so-fancy/diff-so-fancy/releases/download/${version}/diff-so-fancy
+print "url: $url"
+
+# 下载
+wget -q ${GITHUB_PROXY}${url}
+# 赋权
+chmod +x diff-so-fancy
+# 可执行文件
+if [ -n "$DOWNLOAD_ARCH" ]; then
+	cp -f diff-so-fancy $DOWNLOAD
+	print "diff-so-fancy下载完成"
+else
+	if [ "$PWD" != "$BIN" ]; then
+		mv diff-so-fancy ~/.local/bin
+	fi
+	print "diff-so-fancy安装完成"
+fi
