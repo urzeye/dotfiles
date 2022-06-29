@@ -100,6 +100,7 @@ if command -v exa >/dev/null 2>&1; then
 		. ~/.local/etc/.exa/exa.fish
 	fi
 	alias ls='exa'
+	alias la='exa -a'
 else
 	alias l='ls -CF'
 	alias la='ls -A'
