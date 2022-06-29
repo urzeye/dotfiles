@@ -33,11 +33,6 @@ if command -v git >/dev/null 2>&1; then
 	git config --global alias.tree "log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset) %C(auto)%d%C(reset)\n         %C(blink yellow)[%cr]%C(reset)  %x09%C(white)%an: %s %C(reset)'"
 fi
 
-alias l='ls -CF'
-alias la='ls -A'
-alias ll='ls -alF'
-alias ls='ls --color=auto'
-
 # 为 cp 加动画和时间
 if [ -f ~/.local/bin/spiner ]; then
 	alias cp='spiner cp'

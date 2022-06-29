@@ -99,6 +99,12 @@ if command -v exa >/dev/null 2>&1; then
 	elif [ -n "$FISH_VERSION" ] && [ -f ~/.local/etc/.exa/exa.fish ]; then
 		. ~/.local/etc/.exa/exa.fish
 	fi
+	alias ls='exa'
+else
+	alias l='ls -CF'
+	alias la='ls -A'
+	alias ll='ls -alF'
+	alias ls='ls --color=auto'
 fi
 
 # 加载 fzf 配置
