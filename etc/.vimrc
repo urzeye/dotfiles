@@ -92,3 +92,7 @@ set undodir=~/.vim-config/undo_dirs
 
 " 开启剪切板 "
 " set clipboard=unnamedplus
+
+" 粘贴时不自动格式化代码 "
+set noai
+set paste
