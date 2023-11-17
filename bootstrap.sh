@@ -21,7 +21,7 @@ function warn {
 export -f getTime print warn
 
 #### 定义仓库地址 ####
-GITHUB_PROXY=https://ghproxy.com/
+GITHUB_PROXY=https://mirror.ghproxy.com/
 RESPOSITORY=https://github.com/urzeye/dotfiles.git
 
 #### 定义目录 ####
