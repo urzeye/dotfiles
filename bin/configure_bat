@@ -37,7 +37,7 @@ else
 fi
 version=v0.21.0
 file_name=bat-${version}-${arch}-unknown-linux-$([[ "$arch" == "x86_64" ]] && echo musl || echo gnu).tar.gz
-url=https://github.com/sharkdp/bat/releases/download/${version}/${file_name}
+url=https://mirror.ghproxy.com/https://github.com/sharkdp/bat/releases/download/${version}/${file_name}
 print "url: $url"
 
 # 下载并解压
