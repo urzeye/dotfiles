@@ -5,13 +5,13 @@
 with `curl`
 
 ```bash
-curl -fsSL https://ghproxy.com/https://raw.githubusercontent.com/urzeye/dotfiles/main/bootstrap.sh | bash
+curl -fsSL https://mirror.ghproxy.com/https://raw.githubusercontent.com/urzeye/dotfiles/main/bootstrap.sh | bash
 ```
 
 with `wget`
 
 ```bash
-bash <(wget -qO - https://ghproxy.com/https://raw.githubusercontent.com/urzeye/dotfiles/main/bootstrap.sh)
+bash <(wget -qO - https://mirror.ghproxy.com/https://raw.githubusercontent.com/urzeye/dotfiles/main/bootstrap.sh)
 ```
 
 ## 系统换源
