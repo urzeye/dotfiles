@@ -36,7 +36,7 @@ else
 fi
 version=v0.10.1
 file_name=exa-linux-${arch}-${version}.zip
-url=https://github.com/ogham/exa/releases/download/${version}/${file_name}
+url=https://ghproxy.com/https://github.com/ogham/exa/releases/download/${version}/${file_name}
 print "url: $url"
 
 # 下载并解压
