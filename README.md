@@ -4,12 +4,10 @@
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/urzeye/dotfiles/main/bootstrap/macos.sh)
-if [ -x /opt/homebrew/bin/brew ]; then eval "$(/opt/homebrew/bin/brew shellenv)"; elif [ -x /usr/local/bin/brew ]; then eval "$(/usr/local/bin/brew shellenv)"; fi
-chezmoi init --apply https://github.com/urzeye/dotfiles.git
-cd ~/.config/mise
-mise run -o keep-order setup:full
 exec zsh
 ```
+
+首次如果弹出 `Command Line Tools` 安装器，装完后再执行一次同一条命令。
 
 验证：
 
