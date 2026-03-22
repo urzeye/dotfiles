@@ -4,12 +4,26 @@
 
 按顺序执行下面几段命令即可。
 
-### 1. 安装 Homebrew
+### 0. 安装 Xcode Command Line Tools
 
-Homebrew 官方当前安装命令：
+先执行：
 
 ```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+xcode-select --install
+```
+
+说明：
+
+- 这一步放在 Homebrew 前面执行
+- 如果系统已经装过，会提示已安装，直接继续下一步
+- 如果弹出安装窗口，等安装完成后再继续
+
+### 1. 安装 Homebrew
+
+按当前仓库约定，使用下面这条：
+
+```bash
+/bin/zsh -c "$(curl -fsSL https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)"
 ```
 
 让当前 shell 立刻能用 `brew`：
@@ -71,6 +85,48 @@ source ~/.zshrc
 chezmoi apply
 source ~/.zshrc
 ```
+
+## 离线安装
+
+### 仅离线应用配置文件
+
+可以，但前提是目标机器上已经有可用的 `chezmoi`。
+
+如果你手里是一个本地 git 仓库目录：
+
+```bash
+chezmoi init --apply --guess-repo-url=false /path/to/dotfiles
+```
+
+如果你手里只是一个解压后的目录，没有 `.git`：
+
+```bash
+mkdir -p ~/.local/share/chezmoi
+rsync -a /path/to/unzipped-dotfiles/ ~/.local/share/chezmoi/
+chezmoi init
+chezmoi apply
+```
+
+### 完整离线装环境要注意什么
+
+只离线应用 dotfiles 没问题。
+
+但如果你想在完全无网的新机器上把整套环境都装齐，还需要提前准备这些内容：
+
+- Homebrew 本体
+- Homebrew formula / cask 缓存
+- `mise` 本体
+- `mise install` 需要的运行时缓存
+- `pnpm add -g` 相关包缓存
+
+也就是说：
+
+- `chezmoi` 可以离线铺配置
+- `brew bundle install`
+- `mise install`
+- `pnpm add -g ...`
+
+这些默认都还是要网络，除非你提前做了离线缓存。
 
 ## 日常修改配置
 
@@ -271,6 +327,37 @@ mise run -o keep-order setup
 
 ```bash
 mise trust ~/.local/share/chezmoi/private_dot_config/mise/config.toml
+```
+
+### 安装完 `mise` 后，如果不写 `eval "$(mise activate zsh)"` 会怎样
+
+分两种情况：
+
+- `mise` 命令本身通常仍然可以用
+- 但交互式 shell 里不会自动加载 `mise` 的 PATH 和环境变量
+
+这会影响：
+
+- 进入项目目录后自动切换工具版本
+- 自动注入 `mise` 管理的环境变量
+- 直接在 shell 里无感使用 `mise` 提供的工具上下文
+
+本仓库已经把这一行写进了 `~/.zshrc`，所以用：
+
+```bash
+chezmoi init --apply https://github.com/urzeye/dotfiles.git
+```
+
+或者：
+
+```bash
+chezmoi apply
+```
+
+之后，不需要再手动执行：
+
+```bash
+echo 'eval "$(mise activate zsh)"' >> ~/.zshrc
 ```
 
 ### Homebrew 相关内容现在放在哪里
