@@ -117,7 +117,7 @@ fi
 
 "$HOME/.local/bin/chezmoi" init --apply https://github.com/urzeye/dotfiles.git
 cd "$HOME/.config/mise"
-"$HOME/.local/bin/mise" run -o keep-order setup base
+"$HOME/.local/bin/mise" run -o keep-order setup
 
 cat <<'EOF'
 Linux bootstrap complete.
@@ -126,7 +126,7 @@ Now:
   exec zsh
 
 Optional after entering zsh:
-  mise run setup java
-  mise run setup rust
-  mise run setup ai
+  mise run setup:java
+  mise run setup:rust
+  mise run setup:ai
 EOF

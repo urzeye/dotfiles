@@ -4,14 +4,21 @@ go = "1.26.1"
 node = "22"
 python = "3.14.3"
 
+# --- 可选语言工具链 ---
+# 保留在全局配置里，安装完成后会自动被 `mise activate` 接管。
+# Linux 默认不装，通过 setup:java / setup:rust 显式安装。
+java = "oracle-graalvm-25.0.1"
+rust = "latest"
+
 # --- 构建工具 ---
+maven = "latest"
 pnpm = "latest"
+tokei = "latest"
 uv = "latest"
 
 # --- 现代终端增强 ---
 lazygit = "latest"
 starship = "latest"
-
 
 # --- 搜索与导航 ---
 fd = "latest"
@@ -70,44 +77,90 @@ HOMEBREW_NO_ENV_HINTS = "1"
 HOMEBREW_NO_INSTALL_CLEANUP = "1"
 
 # --- Setup Pipeline ---
-[tasks."setup:_pipeline"]
-description = "根据当前已启用的可选组执行 setup"
-hide = true
+[tasks.setup]
+description = "安装基础环境并同步配置"
 depends = [
 	"setup:tools",
 	"setup:apps",
 	"setup:git",
 	"setup:config",
 	"setup:ghostty",
-	"setup:ai",
 	"setup:shell",
 ]
 run = """
 echo "📋 Setup 摘要"
-echo "✅ 当前可选组: ${DOTFILES_ACTIVE_GROUPS:-base}"
-echo "✅ 全部任务已完成；如需让当前终端立即生效，请执行 'source ~/.zshrc'。"
+echo "✅ 基础环境已完成；如需让当前终端立即生效，请执行 'source ~/.zshrc'。"
 """
 
 [tasks."setup:base"]
-description = "兼容旧入口：等价于 `mise run setup base`"
+description = "兼容旧入口：等价于 `mise run setup`"
 hide = true
 run = """
-mise run setup base
+mise run setup
 """
 
-[tasks."setup:all"]
-description = "兼容旧入口：等价于 `mise run setup all`"
+[tasks."setup:full"]
+description = "安装完整开发环境（基础环境 + Java + Rust + AI）"
+depends = [
+	"setup",
+	"setup:java",
+	"setup:rust",
+	"setup:ai",
+]
+run = """
+echo "📋 Full Setup 摘要"
+echo "✅ 完整环境已完成；如需让当前终端立即生效，请执行 'source ~/.zshrc'。"
+"""
+
+[tasks."setup:cleanup"]
+description = "清理旧版动态 setup 遗留文件"
 hide = true
 run = """
-mise run setup all
+rm -f \
+  "$HOME/.config/mise/tasks/setup" \
+  "$HOME/.config/mise/conf.d/20-dotfiles-java.toml" \
+  "$HOME/.config/mise/conf.d/30-dotfiles-rust.toml" \
+  "$HOME/.config/mise/conf.d/90-dotfiles-ai.toml" \
+  "$HOME/.config/mise/options/20-java.toml" \
+  "$HOME/.config/mise/options/30-rust.toml" \
+  "$HOME/.config/mise/options/90-ai.toml"
+
+rmdir "$HOME/.config/mise/conf.d" 2>/dev/null || true
+rmdir "$HOME/.config/mise/options" 2>/dev/null || true
+rmdir "$HOME/.config/mise/tasks" 2>/dev/null || true
 """
 
 [tasks."setup:tools"]
-description = "根据当前配置安装 mise 工具与 uv tool"
+description = "安装基础 mise 工具与 uv tool"
 hide = true
+depends = ["setup:cleanup"]
 run = """
-echo "🔧 同步 mise 工具链与 uv tool..."
-mise install
+echo "🔧 同步基础 mise 工具链与 uv tool..."
+mise install \
+  go \
+  node \
+  python \
+  pnpm \
+  uv \
+  lazygit \
+  starship \
+  fd \
+  fzf \
+  zoxide \
+  ripgrep \
+  bat \
+  eza \
+  jq \
+  shellcheck \
+  actionlint \
+  usage \
+  gh \
+  delta \
+  yq \
+  just \
+  bottom \
+  gping \
+  watchexec
 
 # httpie 缺失时再安装，避免每次 setup 都触发无意义的升级检查与噪音输出。
 if ! uv tool list | grep -q '^httpie '; then
@@ -116,7 +169,25 @@ else
   echo "httpie is already installed"
 fi
 
-echo "✅ mise 工具链已同步。"
+echo "✅ 基础工具链已同步。"
+"""
+
+[tasks."setup:java"]
+description = "安装 Java 与 Maven"
+depends = ["setup:cleanup"]
+run = """
+echo "☕️ 同步 Java 与 Maven..."
+mise install java maven
+echo "✅ Java 与 Maven 已同步。"
+"""
+
+[tasks."setup:rust"]
+description = "安装 Rust 与 tokei"
+depends = ["setup:cleanup"]
+run = """
+echo "🦀 同步 Rust 与 tokei..."
+mise install rust tokei
+echo "✅ Rust 与 tokei 已同步。"
 """
 
 [tasks."setup:apps"]
@@ -172,7 +243,7 @@ depends = ["setup:tools"]
 run = """
 echo "🔀 同步 GitHub CLI 默认配置..."
 
-# GitHub CLI 只设置非交互选项，避免 setup 被登录流程卡住
+# GitHub CLI 只设置非交互选项，避免 setup 被登录流程卡住。
 if command -v gh >/dev/null 2>&1; then
   gh config set editor "${VISUAL:-${EDITOR:-vim}}"
 fi
@@ -252,14 +323,8 @@ esac
 
 [tasks."setup:ai"]
 description = "使用 pnpm 全局安装 AI 相关命令行工具链"
-hide = true
 depends = ["setup:tools"]
 run = """
-if [ "${DOTFILES_ENABLE_AI:-0}" != "1" ]; then
-  echo "🤖 未启用 AI 可选组，跳过。"
-  exit 0
-fi
-
 echo "🤖 同步 AI CLI 工具链..."
 mkdir -p "$PNPM_HOME"
 pnpm config set --global global-bin-dir "$PNPM_HOME"
