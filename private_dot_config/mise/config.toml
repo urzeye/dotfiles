@@ -1,0 +1,292 @@
+[tools]
+# --- 核心工具 ---
+go = "1.26.1"
+java = "oracle-graalvm-25.0.1"
+node = "22"
+python = "3.14.3"
+rust = "latest"
+
+# --- 构建工具 ---
+maven = "latest"
+pnpm = "latest"
+uv = "latest"
+
+# --- 现代终端增强 ---
+lazygit = "latest"
+starship = "latest"
+
+
+# --- 搜索与导航 ---
+fzf = "latest"
+zoxide = "latest"
+ripgrep = "latest"
+
+# --- 文本查看 ---
+bat = "latest"
+fd = "latest"
+
+# --- 现代 ls 替代 ---
+eza = "latest"
+
+# --- 辅助工具 ---
+jq = "latest"
+shellcheck = "latest"
+actionlint = "latest"
+usage = "latest"
+gh = "latest"
+delta = "latest"
+yq = "latest"
+just = "latest"
+bottom = "latest"
+tokei = "latest"
+gping = "latest"
+watchexec = "latest"
+
+[env]
+# --- 1. Python / pip / uv ---
+PIP_INDEX_URL = "https://mirrors.aliyun.com/pypi/simple/"
+UV_INDEX_URL = "https://mirrors.aliyun.com/pypi/simple/"
+
+# --- 2. Rust / Cargo ---
+CARGO_REGISTRIES_CRATES_IO_PROTOCOL = "sparse"
+RUSTUP_DIST_SERVER = "https://mirrors.tuna.tsinghua.edu.cn/rustup"
+RUSTUP_UPDATE_ROOT = "https://mirrors.tuna.tsinghua.edu.cn/rustup/rustup"
+CARGO_NET_GIT_FETCH_WITH_CLI = "true"
+
+# --- 3. Node.js / npm / pnpm ---
+NPM_CONFIG_REGISTRY = "https://registry.npmmirror.com"
+
+# --- 4. Go ---
+GOPROXY = "https://goproxy.cn,direct"
+
+# --- 5. pnpm ---
+PNPM_HOME = "{{env.HOME}}/Library/pnpm"
+# 自动将 pnpm / uv tool bin 加入 PATH
+_.path = ["{{env.HOME}}/Library/pnpm", "{{env.HOME}}/.local/bin"]
+
+# --- 终端颜色强制开启 ---
+COLORTERM = "truecolor"
+
+HOMEBREW_NO_ENV_HINTS = "1"
+HOMEBREW_NO_INSTALL_CLEANUP = "1"
+
+# --- Setup Pipeline ---
+[tasks.setup]
+description = "安装工具并同步配置"
+depends = [
+	"setup:tools",
+	"setup:apps",
+	"setup:git",
+	"setup:config",
+	"setup:ghostty",
+	"setup:ai",
+	"setup:shell",
+]
+run = """
+echo "📋 Setup 摘要"
+echo "✅ 全部任务已完成；如需让当前终端立即生效，请执行 'source ~/.zshrc'。"
+"""
+
+[tasks."setup:tools"]
+description = "安装 mise 工具与隔离的 Python CLI"
+hide = true
+run = """
+echo "🔧 同步 mise 工具链与 uv tool..."
+mise install
+
+# httpie 缺失时再安装，避免每次 setup 都触发无意义的升级检查与噪音输出
+if ! uv tool list | grep -q '^httpie '; then
+  uv tool install httpie
+else
+  echo "httpie is already installed"
+fi
+
+echo "✅ mise 工具链已同步。"
+"""
+
+[tasks."setup:apps"]
+description = "安装通过 Homebrew 提供的桌面应用、字体与 Zsh 插件"
+hide = true
+run = """
+echo "📦 同步 Homebrew 应用、字体与 Zsh 插件..."
+if ! command -v brew >/dev/null 2>&1; then
+  echo "Homebrew is required for setup:apps"
+  exit 1
+fi
+
+install_brew_pkg() {
+  pkg="$1"
+  if ! brew list "$pkg" >/dev/null 2>&1; then
+    brew install "$pkg"
+  fi
+}
+
+install_brew_cask() {
+  cask="$1"
+  if ! brew list --cask "$cask" >/dev/null 2>&1; then
+    brew install --cask "$cask"
+  fi
+}
+
+# chezmoi 负责把独立维护的 dotfiles 同步到目标目录
+install_brew_pkg chezmoi
+
+# VS Code 是 lazygit 打开文件和日常编辑的默认入口
+install_brew_cask visual-studio-code
+
+# Ghostty 配置依赖终端本体与字体同时存在，放在 apps 阶段一起处理最直观
+install_brew_cask ghostty
+install_brew_cask font-jetbrains-mono-nerd-font
+
+# Shell 体验增强插件，后续会在 .zshrc 的受管区块中按需加载
+install_brew_pkg zsh-autosuggestions
+install_brew_pkg zsh-syntax-highlighting
+
+echo "✅ Homebrew 应用、字体与插件已同步。"
+"""
+
+[tasks."setup:git"]
+description = "同步 GitHub CLI 与 Git/delta 全局配置"
+hide = true
+depends = ["setup:tools"]
+run = """
+echo "🔀 同步 GitHub CLI 与 Git 默认配置..."
+
+# GitHub CLI 只设置非交互选项，避免 setup 被登录流程卡住
+if command -v gh >/dev/null 2>&1; then
+  gh config set editor "${VISUAL:-${EDITOR:-vim}}"
+fi
+
+ensure_git_config() {
+  key="$1"
+  value="$2"
+
+  # 只在未设置时写入，避免每次 setup 都覆盖你后续手动调整的全局配置
+  if [ -z "$(git config --global --get "$key" 2>/dev/null)" ]; then
+    git config --global "$key" "$value"
+  fi
+}
+
+# delta 负责更友好的 diff / merge 展示
+if command -v git >/dev/null 2>&1 && command -v delta >/dev/null 2>&1; then
+  git config --global core.pager delta
+  git config --global interactive.diffFilter 'delta --color-only'
+  git config --global delta.navigate true
+  git config --global merge.conflictStyle zdiff3
+  git config --global delta.side-by-side true
+  git config --global delta.line-numbers true
+  git config --global delta.syntax-theme 'Monokai Extended'
+
+  ensure_git_config user.name urzeye
+  ensure_git_config user.email urzeye@163.com
+fi
+
+echo "✅ Git 与 gh 配置已同步。"
+"""
+
+[tasks."setup:config"]
+description = "应用由 chezmoi 管理的 dotfiles"
+hide = true
+depends = ["setup:apps"]
+run = """
+echo "🧩 应用 chezmoi 管理的配置..."
+
+if ! command -v chezmoi >/dev/null 2>&1; then
+  echo "chezmoi is required for setup:config"
+  exit 1
+fi
+
+CHEZMOI_SOURCE_DIR="$(chezmoi source-path)"
+
+# dotfiles 现在以 chezmoi 仓库为准；仓库尚未初始化时仅提示，不阻断工具安装流程。
+if [ ! -d "$CHEZMOI_SOURCE_DIR/.git" ]; then
+  echo "⚠️ 未检测到 chezmoi 仓库，跳过 dotfiles 应用。"
+else
+  chezmoi apply --force
+  echo "✅ chezmoi 配置已应用。"
+fi
+"""
+
+[tasks."setup:ghostty"]
+description = "校验 Ghostty 配置"
+hide = true
+depends = ["setup:apps", "setup:config"]
+run = """
+if command -v ghostty >/dev/null 2>&1; then
+  echo "👻 校验 Ghostty 配置..."
+  ghostty +validate-config >/dev/null
+  echo "✅ Ghostty 配置已校验。"
+else
+  echo "👻 Ghostty 未安装，跳过配置校验。"
+fi
+"""
+
+[tasks."setup:ai"]
+description = "使用 pnpm 全局安装 AI 相关命令行工具链"
+hide = true
+depends = ["setup:tools"]
+run = """
+echo "🤖 同步 AI CLI 工具链..."
+pnpm add -g @anthropic-ai/claude-code @openai/codex @google/gemini-cli @fission-ai/openspec@latest
+echo "✅ AI 工具链已安装！请运行 'hash -r' 或重启终端。"
+"""
+
+[tasks."setup:shell"]
+description = "将 shell 初始化写入 .zshrc 的受管区块"
+hide = true
+depends = ["setup:tools", "setup:apps", "setup:config"]
+run = """
+echo "🐚 更新 .zshrc 中由 mise 托管的初始化区块..."
+ZSHRC="$HOME/.zshrc"
+BLOCK_START="# >>> mise managed setup >>>"
+BLOCK_END="# <<< mise managed setup <<<"
+
+touch "$ZSHRC"
+tmp_file=$(mktemp)
+
+awk \
+  -v start="$BLOCK_START" \
+  -v end="$BLOCK_END" \
+  -v old1='eval "$(mise activate zsh)"' \
+  -v old2='source ~/.mise_generated_aliases.zsh' \
+  -v old3='[ -f "$HOME/.mise_generated_aliases.zsh" ] && source "$HOME/.mise_generated_aliases.zsh"' \
+  -v old4='[ -f "$HOME/.config/zsh/env.zsh" ] && source "$HOME/.config/zsh/env.zsh"' \
+  -v old5='[ -f "$HOME/.config/zsh/aliases.zsh" ] && source "$HOME/.config/zsh/aliases.zsh"' \
+  -v old6='[ -f "$HOME/.config/zsh/functions.zsh" ] && source "$HOME/.config/zsh/functions.zsh"' \
+  -v old7='eval "$(zoxide init zsh)"' \
+  -v old8='eval "$(starship init zsh)"' \
+  -v old9='source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh' \
+  -v old10='source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh' \
+  '
+  $0 == start { skip = 1; next }
+  $0 == end { skip = 0; next }
+  skip { next }
+  $0 == old1 || $0 == old2 || $0 == old3 || $0 == old4 || $0 == old5 || $0 == old6 || $0 == old7 || $0 == old8 || $0 == old9 || $0 == old10 { next }
+  { print }
+  ' "$ZSHRC" > "$tmp_file"
+
+cat <<'EOF' >> "$tmp_file"
+# >>> mise managed setup >>>
+eval "$(mise activate zsh)"
+[ -f "$HOME/.config/zsh/env.zsh" ] && source "$HOME/.config/zsh/env.zsh"
+[ -f "$HOME/.config/zsh/aliases.zsh" ] && source "$HOME/.config/zsh/aliases.zsh"
+[ -f "$HOME/.config/zsh/functions.zsh" ] && source "$HOME/.config/zsh/functions.zsh"
+eval "$(zoxide init zsh)"
+eval "$(starship init zsh)"
+
+if command -v brew >/dev/null 2>&1; then
+  BREW_PREFIX="$(brew --prefix)"
+  [ -f "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ] && source "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+  [ -f "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ] && source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+fi
+# <<< mise managed setup <<<
+EOF
+
+mv "$tmp_file" "$ZSHRC"
+rm -f "$HOME/.mise_generated_aliases.zsh"
+echo "✅ Shell 初始化区块已更新。"
+"""
+
+[settings]
+experimental = true
+plugin_autoupdate_last_check_duration = "24h"

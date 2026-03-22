@@ -1,0 +1,13 @@
+
+gui:
+  showIcons: true
+  mouseEventsEnabled: true
+  border: 'rounded'
+git:
+  paging:
+    colorArg: always
+    pager: delta --dark --paging=never --line-numbers --syntax-theme='Monokai Extended'
+os:
+  # 保留 lazygit 自己的 {{filename}} / {{line}} 模板变量。
+  edit: 'code --goto {{filename}}:{{line}}'
+
