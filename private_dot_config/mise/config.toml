@@ -49,8 +49,6 @@ UV_INDEX_URL = "https://mirrors.aliyun.com/pypi/simple/"
 
 # --- 2. Rust / Cargo ---
 CARGO_REGISTRIES_CRATES_IO_PROTOCOL = "sparse"
-RUSTUP_DIST_SERVER = "https://mirrors.tuna.tsinghua.edu.cn/rustup"
-RUSTUP_UPDATE_ROOT = "https://mirrors.tuna.tsinghua.edu.cn/rustup/rustup"
 CARGO_NET_GIT_FETCH_WITH_CLI = "true"
 
 # --- 3. Node.js / npm / pnpm ---
