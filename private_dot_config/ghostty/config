@@ -3,22 +3,37 @@ font-family = "JetBrainsMono Nerd Font"
 font-size = 14
 font-feature = "liga"
 
-# 视觉效果：半透明 + 模糊 + 隐藏标题栏，保持 macOS 风格
+# 视觉效果：半透明 + 模糊 + macOS 原生 tab 标题栏
 theme = "Catppuccin Mocha"
 term = xterm-256color
-macos-titlebar-style = hidden
+macos-titlebar-style = tabs
 background-opacity = 0.95
 background-blur = 20
 cursor-style = block
 cursor-style-blink = true
 
-# 布局：给内容区留一点呼吸感
+# 布局：给内容区留一点呼吸感，并自动均衡四周因字符网格带来的边缘留白
 window-padding-x = 10
 window-padding-y = 10
+window-padding-balance = true
+
+# 新窗口 / 标签页 / 分屏尽量继承当前上下文，减少重复 cd 和重复调字号
+window-inherit-working-directory = true
+tab-inherit-working-directory = true
+window-new-tab-position = current
+split-inherit-working-directory = true
+window-inherit-font-size = true
 
 # 交互体验
 copy-on-select = clipboard
-mouse-scroll-multiplier = 2
+scrollback-limit = 50000000
+mouse-scroll-multiplier = precision:1,discrete:2
+notify-on-command-finish = unfocused
+notify-on-command-finish-action = no-bell,notify
+macos-option-as-alt = left
+
+# Shell 集成保持默认 detect，只额外确保 Ghostty 自身命令在终端内可用
+shell-integration-features = path
 
 # 分屏快捷键：Cmd+D 左右分屏，Cmd+Shift+D 上下分屏
 keybind = super+d=new_split:right
