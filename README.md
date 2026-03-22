@@ -53,6 +53,7 @@ source ~/.zshrc
 mise ls --current
 chezmoi managed
 ghostty +validate-config
+brew bundle check --file="$HOME/.Brewfile" --no-upgrade
 ```
 
 ## 已有机器更新
@@ -115,6 +116,13 @@ chezmoi managed
 chezmoi add ~/.some/file
 ```
 
+强制以仓库内容覆盖本地目标文件：
+
+```bash
+cd ~/.config/mise
+mise run setup:config:force
+```
+
 推送到远程仓库：
 
 ```bash
@@ -127,6 +135,8 @@ git push
 
 ## 当前管理内容
 
+- `~/.Brewfile`
+- `~/.gitconfig`
 - `~/.zshrc`
 - `~/.config/mise/config.toml`
 - `~/.config/zsh/shell.zsh`
@@ -136,13 +146,40 @@ git push
 
 ## 关键文件
 
+### `~/.Brewfile`
+
+负责 Homebrew 侧的公式、GUI 应用、字体和插件安装。
+
+当前包含：
+
+- `chezmoi`
+- `mole`
+- `zsh-autosuggestions`
+- `zsh-syntax-highlighting`
+- `ghostty`
+- `visual-studio-code`
+- `karabiner-elements`
+- `jordanbaird-ice`
+- `flykey`
+- `font-jetbrains-mono-nerd-font`
+
+### `~/.gitconfig`
+
+负责 Git 全局行为：
+
+- `delta` 作为 pager
+- `interactive.diffFilter`
+- `merge.conflictStyle = zdiff3`
+- `user.name`
+- `user.email`
+
 ### `~/.config/mise/config.toml`
 
 负责：
 
 - 运行时和 CLI 工具安装
 - 镜像源和环境变量
-- setup 子任务编排
+- `chezmoi` / Homebrew / AI 工具的 setup 编排
 
 当前 setup 子任务：
 
@@ -150,13 +187,14 @@ git push
 - `setup:apps`
 - `setup:git`
 - `setup:config`
+- `setup:config:force`
 - `setup:ghostty`
 - `setup:ai`
 - `setup:shell`
 
 ### `~/.zshrc`
 
-只负责初始化：
+只负责初始化，不再由 `setup` 任务重写：
 
 - `mise`
 - `~/.config/zsh/shell.zsh`
@@ -233,6 +271,20 @@ mise run -o keep-order setup
 
 ```bash
 mise trust ~/.local/share/chezmoi/private_dot_config/mise/config.toml
+```
+
+### Homebrew 相关内容现在放在哪里
+
+统一放在：
+
+```text
+~/.Brewfile
+```
+
+`setup:apps` 会执行：
+
+```bash
+brew bundle install --file="$HOME/.Brewfile" --no-upgrade
 ```
 
 ### 为什么源目录里有 `private_dot_config`、`private_Library`

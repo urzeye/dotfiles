@@ -105,87 +105,50 @@ echo "✅ mise 工具链已同步。"
 """
 
 [tasks."setup:apps"]
-description = "安装通过 Homebrew 提供的桌面应用、字体与 Zsh 插件"
+description = "通过 Brewfile 同步 Homebrew 应用、字体与插件"
 hide = true
 run = """
-echo "📦 同步 Homebrew 应用、字体与 Zsh 插件..."
+echo "📦 通过 Brewfile 同步 Homebrew 应用、字体与插件..."
 if ! command -v brew >/dev/null 2>&1; then
   echo "Homebrew is required for setup:apps"
   exit 1
 fi
 
-install_brew_pkg() {
-  pkg="$1"
-  if ! brew list "$pkg" >/dev/null 2>&1; then
-    brew install "$pkg"
-  fi
-}
+BREWFILE="$HOME/.Brewfile"
 
-install_brew_cask() {
-  cask="$1"
-  if ! brew list --cask "$cask" >/dev/null 2>&1; then
-    brew install --cask "$cask"
-  fi
-}
+# 首次 setup 时 dotfiles 可能还没 apply，允许直接使用 chezmoi 源目录里的 Brewfile。
+if [ ! -f "$BREWFILE" ] && command -v chezmoi >/dev/null 2>&1; then
+  SOURCE_BREWFILE="$(chezmoi source-path)/dot_Brewfile"
+  [ -f "$SOURCE_BREWFILE" ] && BREWFILE="$SOURCE_BREWFILE"
+fi
 
-# chezmoi 负责把独立维护的 dotfiles 同步到目标目录
-install_brew_pkg chezmoi
+if [ ! -f "$BREWFILE" ]; then
+  echo "Brewfile not found: $BREWFILE"
+  exit 1
+fi
 
-# VS Code 是 lazygit 打开文件和日常编辑的默认入口
-install_brew_cask visual-studio-code
-
-# Ghostty 配置依赖终端本体与字体同时存在，放在 apps 阶段一起处理最直观
-install_brew_cask ghostty
-install_brew_cask font-jetbrains-mono-nerd-font
-
-# Shell 体验增强插件，后续会在 .zshrc 的受管区块中按需加载
-install_brew_pkg zsh-autosuggestions
-install_brew_pkg zsh-syntax-highlighting
+brew bundle install --file="$BREWFILE" --no-upgrade
 
 echo "✅ Homebrew 应用、字体与插件已同步。"
 """
 
 [tasks."setup:git"]
-description = "同步 GitHub CLI 与 Git/delta 全局配置"
+description = "同步 GitHub CLI 默认配置"
 hide = true
 depends = ["setup:tools"]
 run = """
-echo "🔀 同步 GitHub CLI 与 Git 默认配置..."
+echo "🔀 同步 GitHub CLI 默认配置..."
 
 # GitHub CLI 只设置非交互选项，避免 setup 被登录流程卡住
 if command -v gh >/dev/null 2>&1; then
   gh config set editor "${VISUAL:-${EDITOR:-vim}}"
 fi
 
-ensure_git_config() {
-  key="$1"
-  value="$2"
-
-  # 只在未设置时写入，避免每次 setup 都覆盖你后续手动调整的全局配置
-  if [ -z "$(git config --global --get "$key" 2>/dev/null)" ]; then
-    git config --global "$key" "$value"
-  fi
-}
-
-# delta 负责更友好的 diff / merge 展示
-if command -v git >/dev/null 2>&1 && command -v delta >/dev/null 2>&1; then
-  git config --global core.pager delta
-  git config --global interactive.diffFilter 'delta --color-only'
-  git config --global delta.navigate true
-  git config --global merge.conflictStyle zdiff3
-  git config --global delta.side-by-side true
-  git config --global delta.line-numbers true
-  git config --global delta.syntax-theme 'Monokai Extended'
-
-  ensure_git_config user.name urzeye
-  ensure_git_config user.email urzeye@163.com
-fi
-
-echo "✅ Git 与 gh 配置已同步。"
+echo "✅ gh 配置已同步。"
 """
 
 [tasks."setup:config"]
-description = "应用由 chezmoi 管理的 dotfiles"
+description = "安全应用由 chezmoi 管理的 dotfiles"
 hide = true
 depends = ["setup:apps"]
 run = """
@@ -202,8 +165,30 @@ CHEZMOI_SOURCE_DIR="$(chezmoi source-path)"
 if [ ! -d "$CHEZMOI_SOURCE_DIR/.git" ]; then
   echo "⚠️ 未检测到 chezmoi 仓库，跳过 dotfiles 应用。"
 else
-  chezmoi apply --force
+  chezmoi apply
   echo "✅ chezmoi 配置已应用。"
+fi
+"""
+
+[tasks."setup:config:force"]
+description = "强制覆盖目标文件并应用 chezmoi dotfiles"
+hide = true
+depends = ["setup:apps"]
+run = """
+echo "🧨 强制应用 chezmoi 管理的配置..."
+
+if ! command -v chezmoi >/dev/null 2>&1; then
+  echo "chezmoi is required for setup:config:force"
+  exit 1
+fi
+
+CHEZMOI_SOURCE_DIR="$(chezmoi source-path)"
+
+if [ ! -d "$CHEZMOI_SOURCE_DIR/.git" ]; then
+  echo "⚠️ 未检测到 chezmoi 仓库，跳过强制应用。"
+else
+  chezmoi apply --force
+  echo "✅ chezmoi 配置已强制应用。"
 fi
 """
 
@@ -232,45 +217,14 @@ echo "✅ AI 工具链已安装！请运行 'hash -r' 或重启终端。"
 """
 
 [tasks."setup:shell"]
-description = "将 shell 初始化写入 .zshrc 的受管区块"
+description = "校验受管 shell 配置是否就位"
 hide = true
 depends = ["setup:tools", "setup:apps", "setup:config"]
 run = """
-echo "🐚 更新 .zshrc 中由 mise 托管的初始化区块..."
-ZSHRC="$HOME/.zshrc"
-BLOCK_START="# >>> mise managed setup >>>"
-BLOCK_END="# <<< mise managed setup <<<"
-
-touch "$ZSHRC"
-tmp_file=$(mktemp)
-
-awk \
-  -v start="$BLOCK_START" \
-  -v end="$BLOCK_END" \
-  '
-  $0 == start { skip = 1; next }
-  $0 == end { skip = 0; next }
-  skip { next }
-  { print }
-  ' "$ZSHRC" > "$tmp_file"
-
-cat <<'EOF' >> "$tmp_file"
-# >>> mise managed setup >>>
-eval "$(mise activate zsh)"
-[ -f "$HOME/.config/zsh/shell.zsh" ] && source "$HOME/.config/zsh/shell.zsh"
-eval "$(zoxide init zsh)"
-eval "$(starship init zsh)"
-
-if command -v brew >/dev/null 2>&1; then
-  BREW_PREFIX="$(brew --prefix)"
-  [ -f "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ] && source "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
-  [ -f "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ] && source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-fi
-# <<< mise managed setup <<<
-EOF
-
-mv "$tmp_file" "$ZSHRC"
-echo "✅ Shell 初始化区块已更新。"
+echo "🐚 校验受管 shell 配置..."
+[ -f "$HOME/.zshrc" ] || { echo "~/.zshrc is missing"; exit 1; }
+[ -f "$HOME/.config/zsh/shell.zsh" ] || { echo "~/.config/zsh/shell.zsh is missing"; exit 1; }
+echo "✅ Shell 配置已就位。"
 """
 
 [settings]

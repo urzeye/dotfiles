@@ -1,0 +1,11 @@
+brew "chezmoi"
+brew "mole"
+brew "zsh-autosuggestions"
+brew "zsh-syntax-highlighting"
+
+cask "flykey"
+cask "font-jetbrains-mono-nerd-font"
+cask "ghostty"
+cask "jordanbaird-ice"
+cask "karabiner-elements"
+cask "visual-studio-code"
