@@ -17,6 +17,7 @@ tokei = "latest"
 uv = "latest"
 
 # --- 现代终端增强 ---
+atuin = "latest"
 lazygit = "latest"
 starship = "latest"
 
@@ -43,6 +44,7 @@ yq = "latest"
 just = "latest"
 bottom = "latest"
 gping = "latest"
+tlrc = "latest"
 watchexec = "latest"
 
 [env]
@@ -92,13 +94,6 @@ echo "📋 Setup 摘要"
 echo "✅ 基础环境已完成；如需让当前终端立即生效，请执行 'source ~/.zshrc'。"
 """
 
-[tasks."setup:base"]
-description = "兼容旧入口：等价于 `mise run setup`"
-hide = true
-run = """
-mise run setup
-"""
-
 [tasks."setup:full"]
 description = "安装完整开发环境（基础环境 + Java + Rust + AI）"
 depends = [
@@ -125,6 +120,7 @@ mise install \
   python \
   pnpm \
   uv \
+  atuin \
   lazygit \
   starship \
   fd \
@@ -143,6 +139,7 @@ mise install \
   just \
   bottom \
   gping \
+  tlrc \
   watchexec
 
 # httpie 缺失时再安装，避免每次 setup 都触发无意义的升级检查与噪音输出。
@@ -177,7 +174,7 @@ hide = true
 run = """
 case "$(uname -s)" in
   Darwin) mise run setup:apps:darwin ;;
-  Linux) mise run setup:apps:linux ;;
+  Linux) echo "📦 Linux 系统依赖由 bootstrap/linux.sh 负责；setup 中跳过系统包安装。" ;;
   *) echo "Unsupported OS: $(uname -s)"; exit 1 ;;
 esac
 """
@@ -208,13 +205,6 @@ fi
 brew bundle install --file="$BREWFILE" --no-upgrade
 
 echo "✅ Homebrew 应用、字体与插件已同步。"
-"""
-
-[tasks."setup:apps:linux"]
-description = "Linux 的系统级依赖由 bootstrap 脚本负责"
-hide = true
-run = """
-echo "📦 Linux 系统依赖由 bootstrap/linux.sh 负责；setup 中跳过系统包安装。"
 """
 
 [tasks."setup:git"]

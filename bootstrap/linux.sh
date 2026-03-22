@@ -108,11 +108,15 @@ elif [ -f "$HOME/.profile" ]; then
   upsert_block "$HOME/.profile" "$BASH_BOOTSTRAP_BEGIN" "$BASH_BOOTSTRAP_END" "$BASH_BOOTSTRAP_BLOCK"
 fi
 
-if command -v zsh >/dev/null 2>&1 && command -v chsh >/dev/null 2>&1; then
-  cat <<EOF
-Run this once if you want zsh as the default login shell:
-  chsh -s "$(command -v zsh)"
-EOF
+if command -v zsh >/dev/null 2>&1; then
+  ZSH_PATH="$(command -v zsh)"
+  if [ "${SHELL:-}" != "$ZSH_PATH" ] && command -v chsh >/dev/null 2>&1; then
+    if chsh -s "$ZSH_PATH" "$(id -un)" </dev/null >/dev/null 2>&1; then
+      echo "Default login shell set to $ZSH_PATH"
+    else
+      echo "Could not switch default login shell automatically. Run: chsh -s \"$ZSH_PATH\""
+    fi
+  fi
 fi
 
 "$HOME/.local/bin/chezmoi" init --apply https://github.com/urzeye/dotfiles.git

@@ -51,6 +51,17 @@ tldr git
 
 ## 已有机器更新
 
+macOS：
+
+```bash
+chezmoi update
+cd ~/.config/mise
+mise run -o keep-order setup:full
+source ~/.zshrc
+```
+
+Linux：
+
 ```bash
 chezmoi update
 cd ~/.config/mise
@@ -102,14 +113,8 @@ mise run setup:full
 编辑：
 
 ```bash
-chezmoi edit ~/.zshrc
-chezmoi edit ~/.vimrc
 chezmoi edit ~/.config/mise/config.toml
-chezmoi edit ~/.config/zsh/shell.zsh
-chezmoi edit ~/.config/zsh/common.zsh
-chezmoi edit ~/.config/zsh/platform/darwin.zsh
-chezmoi edit ~/.config/zsh/platform/linux.zsh
-chezmoi edit ~/.config/starship.toml
+chezmoi edit ~/.zshrc
 chezmoi edit ~/.config/ghostty/config
 ```
 
