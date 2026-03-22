@@ -1,0 +1,18 @@
+# Copy this file to ~/.ssh/config.local and replace the example values.
+#
+# cp ~/.ssh/config.local.example ~/.ssh/config.local
+
+Host my-server
+  HostName 1.2.3.4
+  User root
+  Port 22
+  IdentityFile ~/.ssh/id_ed25519
+
+# Host bastion
+#   HostName 2.3.4.5
+#   User ubuntu
+#
+# Host internal-api
+#   HostName 10.0.0.8
+#   User deploy
+#   ProxyJump bastion

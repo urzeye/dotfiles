@@ -198,9 +198,65 @@ atuin key
 atuin status
 ```
 
+## SSH
+
+生成密钥：
+
+```bash
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+ssh-keygen -t ed25519 -a 64 -f ~/.ssh/id_ed25519 -C "$(whoami)@$(hostname)-$(date +%F)"
+```
+
+查看公钥：
+
+```bash
+cat ~/.ssh/id_ed25519.pub
+```
+
+macOS 追加到 Keychain：
+
+```bash
+ssh-add --apple-use-keychain ~/.ssh/id_ed25519
+```
+
+在远程服务器添加公钥：
+
+```bash
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+echo '把你的公钥整行粘贴到这里' >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+```
+
+本仓库只管理 SSH 骨架，不保存真实服务器：
+
+```bash
+cp ~/.ssh/config.local.example ~/.ssh/config.local
+vim ~/.ssh/config.local
+```
+
+示例：
+
+```sshconfig
+Host my-server
+  HostName 1.2.3.4
+  User root
+  Port 22
+  IdentityFile ~/.ssh/id_ed25519
+```
+
+连接：
+
+```bash
+ssh my-server
+```
+
 ## 受管文件
 
 - `~/.gitconfig`
+- `~/.ssh/config`
+- `~/.ssh/config.d/00-defaults.conf`
+- `~/.ssh/config.local.example`
 - `~/.vimrc`
 - `~/.zshrc`
 - `~/.config/mise/config.toml`
