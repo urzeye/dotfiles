@@ -112,30 +112,13 @@ echo "📋 Full Setup 摘要"
 echo "✅ 完整环境已完成；如需让当前终端立即生效，请执行 'source ~/.zshrc'。"
 """
 
-[tasks."setup:cleanup"]
-description = "清理旧版动态 setup 遗留文件"
-hide = true
-run = """
-rm -f \
-  "$HOME/.config/mise/tasks/setup" \
-  "$HOME/.config/mise/conf.d/20-dotfiles-java.toml" \
-  "$HOME/.config/mise/conf.d/30-dotfiles-rust.toml" \
-  "$HOME/.config/mise/conf.d/90-dotfiles-ai.toml" \
-  "$HOME/.config/mise/options/20-java.toml" \
-  "$HOME/.config/mise/options/30-rust.toml" \
-  "$HOME/.config/mise/options/90-ai.toml"
-
-rmdir "$HOME/.config/mise/conf.d" 2>/dev/null || true
-rmdir "$HOME/.config/mise/options" 2>/dev/null || true
-rmdir "$HOME/.config/mise/tasks" 2>/dev/null || true
-"""
-
 [tasks."setup:tools"]
 description = "安装基础 mise 工具与 uv tool"
 hide = true
-depends = ["setup:cleanup"]
 run = """
 echo "🔧 同步基础 mise 工具链与 uv tool..."
+# 这里显式列基础工具，而不是直接 `mise install`，
+# 否则会把 [tools] 里声明但希望按需安装的 Java / Rust 也一并装上。
 mise install \
   go \
   node \
@@ -174,7 +157,6 @@ echo "✅ 基础工具链已同步。"
 
 [tasks."setup:java"]
 description = "安装 Java 与 Maven"
-depends = ["setup:cleanup"]
 run = """
 echo "☕️ 同步 Java 与 Maven..."
 mise install java maven
@@ -183,7 +165,6 @@ echo "✅ Java 与 Maven 已同步。"
 
 [tasks."setup:rust"]
 description = "安装 Rust 与 tokei"
-depends = ["setup:cleanup"]
 run = """
 echo "🦀 同步 Rust 与 tokei..."
 mise install rust tokei

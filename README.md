@@ -54,7 +54,6 @@ tldr git
 ```bash
 chezmoi update
 cd ~/.config/mise
-mise run setup:cleanup
 mise run -o keep-order setup
 source ~/.zshrc
 ```
@@ -94,7 +93,6 @@ Setup：
 
 ```bash
 mise run setup
-mise run setup:cleanup
 mise run setup:java
 mise run setup:rust
 mise run setup:ai
@@ -254,7 +252,6 @@ atuin status
 公开入口：
 
 - `mise run setup`
-- `mise run setup:cleanup`
 - `mise run setup:java`
 - `mise run setup:rust`
 - `mise run setup:ai`
