@@ -1,0 +1,71 @@
+" Vim configuration managed by chezmoi.
+
+" --- Basics ---
+syntax on
+filetype plugin indent on
+set encoding=utf-8
+
+" --- UI ---
+set number
+set scrolloff=7
+set wildmenu
+set showmatch
+set matchtime=2
+set foldcolumn=1
+set laststatus=2
+set showtabline=2
+set cmdheight=2
+set wrap
+
+" --- Search ---
+set ignorecase
+set smartcase
+set hlsearch
+set incsearch
+
+" --- Editing ---
+set backspace=indent,eol,start
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+set expandtab
+set smarttab
+set autoindent
+set smartindent
+set autoread
+set switchbuf=useopen,usetab,newtab
+
+" 检测到文件被外部改动时自动重新读取。
+autocmd CursorHold,CursorHoldI * checktime
+
+" 重新打开文件时跳回上次退出的位置。
+autocmd BufReadPost *
+  \ if line("'\"") > 1 && line("'\"") <= line("$") |
+  \   execute "normal! g`\"" |
+  \ endif
+
+" --- Undo ---
+set undofile
+let s:undo_dir = expand('~/.vim/undo')
+if !isdirectory(s:undo_dir)
+  call mkdir(s:undo_dir, 'p')
+endif
+let &undodir = s:undo_dir
+
+" --- Folding ---
+set foldmethod=syntax
+set nofoldenable
+
+" --- Clipboard ---
+if has('clipboard')
+  set clipboard=unnamedplus
+endif
+
+" --- Colors ---
+set background=dark
+if has('termguicolors')
+  set termguicolors
+endif
+
+" 使用 Vim 自带的暗色主题，避免依赖未安装的外部配色方案。
+silent! colorscheme desert

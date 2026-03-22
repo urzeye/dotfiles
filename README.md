@@ -95,6 +95,7 @@ chezmoi apply
 
 ```bash
 chezmoi edit ~/.zshrc
+chezmoi edit ~/.vimrc
 chezmoi edit ~/.config/mise/config.toml
 chezmoi edit ~/.config/zsh/shell.zsh
 chezmoi edit ~/.config/zsh/common.zsh
@@ -221,6 +222,7 @@ atuin status
 ## 受管文件
 
 - `~/.gitconfig`
+- `~/.vimrc`
 - `~/.zshrc`
 - `~/.config/mise/config.toml`
 - `~/.config/zsh/shell.zsh`
@@ -256,6 +258,10 @@ atuin status
 ### `~/.zshrc`
 
 只保留 PATH 引导、`mise` 激活和 `shell.zsh` 入口。
+
+### `~/.vimrc`
+
+Vim 基础编辑体验、搜索、缩进、持久化 undo 与内置暗色主题。
 
 ### `~/.config/zsh/shell.zsh`
 
