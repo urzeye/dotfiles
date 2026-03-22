@@ -7,7 +7,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/urzeye/dotfiles/main/bootstr
 if [ -x /opt/homebrew/bin/brew ]; then eval "$(/opt/homebrew/bin/brew shellenv)"; elif [ -x /usr/local/bin/brew ]; then eval "$(/usr/local/bin/brew shellenv)"; fi
 chezmoi init --apply https://github.com/urzeye/dotfiles.git
 cd ~/.config/mise
-mise run -o keep-order setup
+mise run -o keep-order setup all
 exec zsh
 ```
 
@@ -32,10 +32,12 @@ bash <(curl -fsSL https://raw.githubusercontent.com/urzeye/dotfiles/main/bootstr
 exec zsh
 ```
 
-如需 AI CLI，再额外执行：
+按需补装：
 
 ```bash
-mise run setup:ai
+mise run setup java
+mise run setup rust
+mise run setup ai
 ```
 
 验证：
@@ -86,6 +88,17 @@ chezmoi apply
 - Linux: `bootstrap/linux.sh`, `mise install`, `pnpm add -g ...`
 
 ## 日常命令
+
+Setup：
+
+```bash
+mise run setup
+mise run setup status
+mise run setup base
+mise run setup all
+mise run setup java rust
+mise run setup ai
+```
 
 编辑：
 
@@ -235,21 +248,21 @@ atuin status
 
 ### `~/.config/mise/config.toml`
 
-运行时、CLI 工具、环境变量、跨平台 setup 任务。
+运行时、CLI 工具、环境变量、内部 setup 流水线。
 
-当前任务：
+公开入口：
 
-- `setup:tools`
-- `setup:base`
-- `setup:apps`
-- `setup:apps:darwin`
-- `setup:apps:linux`
-- `setup:git`
-- `setup:config`
-- `setup:config:force`
-- `setup:ghostty`
-- `setup:ai`
-- `setup:shell`
+- `mise run setup`
+- `mise run setup status`
+- `mise run setup base`
+- `mise run setup all`
+- `mise run setup java rust ai`
+
+可选组模板：
+
+- `~/.config/mise/options/20-java.toml`
+- `~/.config/mise/options/30-rust.toml`
+- `~/.config/mise/options/90-ai.toml`
 
 ### `~/.zshrc`
 

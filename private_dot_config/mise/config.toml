@@ -1,13 +1,10 @@
 [tools]
 # --- 核心工具 ---
 go = "1.26.1"
-java = "oracle-graalvm-25.0.1"
 node = "22"
 python = "3.14.3"
-rust = "latest"
 
 # --- 构建工具 ---
-maven = "latest"
 pnpm = "latest"
 uv = "latest"
 
@@ -38,7 +35,6 @@ delta = "latest"
 yq = "latest"
 just = "latest"
 bottom = "latest"
-tokei = "latest"
 gping = "latest"
 watchexec = "latest"
 
@@ -74,8 +70,9 @@ HOMEBREW_NO_ENV_HINTS = "1"
 HOMEBREW_NO_INSTALL_CLEANUP = "1"
 
 # --- Setup Pipeline ---
-[tasks.setup]
-description = "安装工具并同步配置"
+[tasks."setup:_pipeline"]
+description = "根据当前已启用的可选组执行 setup"
+hide = true
 depends = [
 	"setup:tools",
 	"setup:apps",
@@ -87,31 +84,32 @@ depends = [
 ]
 run = """
 echo "📋 Setup 摘要"
+echo "✅ 当前可选组: ${DOTFILES_ACTIVE_GROUPS:-base}"
 echo "✅ 全部任务已完成；如需让当前终端立即生效，请执行 'source ~/.zshrc'。"
 """
 
 [tasks."setup:base"]
-description = "安装基础工具并同步配置（不含 AI 工具链）"
-depends = [
-	"setup:tools",
-	"setup:apps",
-	"setup:git",
-	"setup:config",
-	"setup:shell",
-]
+description = "兼容旧入口：等价于 `mise run setup base`"
+hide = true
 run = """
-echo "📋 Base Setup 摘要"
-echo "✅ 基础环境已完成；如需让当前终端立即生效，请执行 'source ~/.zshrc'。"
+mise run setup base
+"""
+
+[tasks."setup:all"]
+description = "兼容旧入口：等价于 `mise run setup all`"
+hide = true
+run = """
+mise run setup all
 """
 
 [tasks."setup:tools"]
-description = "安装 mise 工具与隔离的 Python CLI"
+description = "根据当前配置安装 mise 工具与 uv tool"
 hide = true
 run = """
 echo "🔧 同步 mise 工具链与 uv tool..."
 mise install
 
-# httpie 缺失时再安装，避免每次 setup 都触发无意义的升级检查与噪音输出
+# httpie 缺失时再安装，避免每次 setup 都触发无意义的升级检查与噪音输出。
 if ! uv tool list | grep -q '^httpie '; then
   uv tool install httpie
 else
@@ -257,6 +255,11 @@ description = "使用 pnpm 全局安装 AI 相关命令行工具链"
 hide = true
 depends = ["setup:tools"]
 run = """
+if [ "${DOTFILES_ENABLE_AI:-0}" != "1" ]; then
+  echo "🤖 未启用 AI 可选组，跳过。"
+  exit 0
+fi
+
 echo "🤖 同步 AI CLI 工具链..."
 mkdir -p "$PNPM_HOME"
 pnpm config set --global global-bin-dir "$PNPM_HOME"

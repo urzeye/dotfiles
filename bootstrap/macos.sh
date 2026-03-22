@@ -24,6 +24,6 @@ Next:
   if [ -x /opt/homebrew/bin/brew ]; then eval "$(/opt/homebrew/bin/brew shellenv)"; elif [ -x /usr/local/bin/brew ]; then eval "$(/usr/local/bin/brew shellenv)"; fi
   chezmoi init --apply https://github.com/urzeye/dotfiles.git
   cd ~/.config/mise
-  mise run -o keep-order setup
+  mise run -o keep-order setup all
   exec zsh
 EOF

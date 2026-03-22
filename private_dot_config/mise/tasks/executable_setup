@@ -1,0 +1,139 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+MISE_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/mise"
+OPTIONS_DIR="$MISE_DIR/options"
+CONF_D_DIR="$MISE_DIR/conf.d"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  mise run setup
+  mise run setup status
+  mise run setup base
+  mise run setup all
+  mise run setup java [rust] [ai]
+
+Examples:
+  mise run -o keep-order setup all
+  mise run setup base
+  mise run setup java rust
+  mise run setup ai
+EOF
+}
+
+die() {
+  echo "setup: $*" >&2
+  exit 1
+}
+
+# conf.d 是 mise 自动加载的目录。
+# 这里只管理带 dotfiles 前缀的文件，避免覆盖你自行维护的其他片段。
+managed_path() {
+  case "$1" in
+    java) printf '%s/20-dotfiles-java.toml\n' "$CONF_D_DIR" ;;
+    rust) printf '%s/30-dotfiles-rust.toml\n' "$CONF_D_DIR" ;;
+    ai) printf '%s/90-dotfiles-ai.toml\n' "$CONF_D_DIR" ;;
+    *) die "unknown group: $1" ;;
+  esac
+}
+
+option_path() {
+  case "$1" in
+    java) printf '%s/20-java.toml\n' "$OPTIONS_DIR" ;;
+    rust) printf '%s/30-rust.toml\n' "$OPTIONS_DIR" ;;
+    ai) printf '%s/90-ai.toml\n' "$OPTIONS_DIR" ;;
+    *) die "unknown group: $1" ;;
+  esac
+}
+
+append_unique_group() {
+  local group="$1"
+
+  case " ${SELECTED_GROUPS[*]:-} " in
+    *" $group "*) ;;
+    *) SELECTED_GROUPS+=("$group") ;;
+  esac
+}
+
+load_current_groups() {
+  SELECTED_GROUPS=()
+
+  for group in java rust ai; do
+    if [ -f "$(managed_path "$group")" ]; then
+      SELECTED_GROUPS+=("$group")
+    fi
+  done
+}
+
+format_groups() {
+  if [ "$#" -eq 0 ]; then
+    printf 'base\n'
+  else
+    printf '%s\n' "$*"
+  fi
+}
+
+current_groups_label() {
+  if [ "${#SELECTED_GROUPS[@]}" -eq 0 ]; then
+    format_groups
+  else
+    format_groups "${SELECTED_GROUPS[@]}"
+  fi
+}
+
+sync_selected_groups() {
+  mkdir -p "$CONF_D_DIR"
+
+  rm -f \
+    "$(managed_path java)" \
+    "$(managed_path rust)" \
+    "$(managed_path ai)"
+
+  for group in "${SELECTED_GROUPS[@]}"; do
+    local src dst
+    src="$(option_path "$group")"
+    dst="$(managed_path "$group")"
+    [ -f "$src" ] || die "missing option file: $src"
+    cp "$src" "$dst"
+  done
+}
+
+SELECTED_GROUPS=()
+
+case "${1:-}" in
+  "")
+    load_current_groups
+    ;;
+  help|-h|--help)
+    usage
+    exit 0
+    ;;
+  status)
+    load_current_groups
+    echo "Current optional groups: $(current_groups_label)"
+    exit 0
+    ;;
+  base)
+    [ "$#" -eq 1 ] || die "'base' must be used alone"
+    ;;
+  all)
+    [ "$#" -eq 1 ] || die "'all' must be used alone"
+    SELECTED_GROUPS=(java rust ai)
+    ;;
+  *)
+    for group in "$@"; do
+      case "$group" in
+        java|rust|ai) append_unique_group "$group" ;;
+        *) die "unknown setup group: $group" ;;
+      esac
+    done
+    ;;
+esac
+
+sync_selected_groups
+
+ACTIVE_GROUPS="$(current_groups_label)"
+echo "📦 当前可选组: $ACTIVE_GROUPS"
+
+exec env DOTFILES_ACTIVE_GROUPS="$ACTIVE_GROUPS" mise run -o "${MISE_TASK_OUTPUT:-keep-order}" setup:_pipeline
