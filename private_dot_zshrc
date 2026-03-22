@@ -5,5 +5,7 @@ typeset -U path PATH
 [ -d /opt/homebrew/bin ] && path=(/opt/homebrew/bin /opt/homebrew/sbin $path)
 [ -d /usr/local/bin ] && path=(/usr/local/bin /usr/local/sbin $path)
 
-command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
+if (( $+commands[mise] )); then
+  eval "$("$(command -v mise)" activate zsh)"
+fi
 [ -f "$HOME/.config/zsh/shell.zsh" ] && source "$HOME/.config/zsh/shell.zsh"
