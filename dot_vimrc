@@ -56,6 +56,22 @@ let &undodir = s:undo_dir
 set foldmethod=syntax
 set nofoldenable
 
+" --- Keymaps ---
+" 快速退出插入模式；在可视模式下也允许用 jk 直接回到 normal。
+inoremap jk <Esc>
+xnoremap jk <Esc>
+
+" H / L 统一表示跳到当前行首 / 行尾。
+" 同时覆盖 normal、insert、visual、operator-pending，保证移动与 d/c/y 等操作行为一致。
+nnoremap H ^
+nnoremap L $
+inoremap H <C-o>^
+inoremap L <C-o>$
+xnoremap H ^
+xnoremap L $
+onoremap H ^
+onoremap L $
+
 " --- Clipboard ---
 if has('clipboard')
   set clipboard=unnamedplus
