@@ -168,6 +168,110 @@ git commit -m "chore: update dotfiles"
 git push
 ```
 
+## 常用工具
+
+### `mas`
+
+先在 Mac App Store 登录 Apple ID。
+
+常用命令：
+
+```bash
+mas search Amphetamine
+mas list
+mas get 937984704
+mas upgrade
+```
+
+说明：
+
+- `mas search`：搜索 App Store 应用
+- `mas list`：列出当前通过 App Store 安装的应用
+- `mas get <id>`：安装免费应用
+- `mas upgrade`：更新已安装的 App Store 应用
+
+默认受管应用：
+
+```bash
+mas "Amphetamine", id: 937984704
+```
+
+### `atuin`
+
+首次启用：
+
+```bash
+source ~/.zshrc
+atuin import auto
+```
+
+最常用：
+
+```bash
+atuin search -i
+atuin search docker
+atuin search --cwd
+atuin stats
+```
+
+日常使用：
+
+- 在终端里按 `Ctrl-r`，打开 Atuin 历史搜索界面
+- 输入关键词后回车，直接把历史命令填回当前命令行
+- 不想跨项目串历史时，用 `atuin search --cwd` 只看当前目录
+
+首次导入历史：
+
+```bash
+atuin import auto
+```
+
+如果只想导入 zsh 历史：
+
+```bash
+atuin import zsh
+```
+
+交互搜索：
+
+```bash
+atuin search -i
+```
+
+非交互搜索：
+
+```bash
+atuin search pnpm
+atuin search git --cmd-only
+atuin search --cwd npm
+```
+
+统计：
+
+```bash
+atuin stats
+```
+
+多机同步，可选：
+
+```bash
+atuin register
+atuin login
+atuin sync
+atuin key
+atuin status
+```
+
+说明：
+
+- `register`：注册 Atuin 官方同步账号
+- `login`：登录已有账号
+- `sync`：同步历史记录
+- `key`：导出加密密钥，给另一台机器复用
+- `status`：查看同步状态
+
+不做同步也能正常使用本地历史搜索。
+
 ## 受管文件
 
 - `~/.Brewfile`

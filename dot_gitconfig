@@ -13,6 +13,15 @@
 [merge]
 	conflictStyle = zdiff3
 
+[init]
+	defaultBranch = main
+
+[fetch]
+	prune = true
+
+[rerere]
+	enabled = true
+
 [user]
 	name = urzeye
 	email = urzeye@163.com

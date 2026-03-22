@@ -1,5 +1,6 @@
 eval "$(mise activate zsh)"
 [ -f "$HOME/.config/zsh/shell.zsh" ] && source "$HOME/.config/zsh/shell.zsh"
+command -v atuin >/dev/null 2>&1 && eval "$(atuin init zsh)"
 eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
 

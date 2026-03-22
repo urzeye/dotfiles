@@ -1,7 +1,11 @@
+brew "atuin"
 brew "chezmoi"
+brew "mas"
 brew "mole"
 brew "zsh-autosuggestions"
 brew "zsh-syntax-highlighting"
+
+mas "Amphetamine", id: 937984704
 
 cask "flykey"
 cask "font-jetbrains-mono-nerd-font"
