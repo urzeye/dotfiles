@@ -60,9 +60,10 @@ NPM_CONFIG_REGISTRY = "https://registry.npmmirror.com"
 GOPROXY = "https://goproxy.cn,direct"
 
 # --- 5. pnpm ---
-PNPM_HOME = "{{env.HOME}}/Library/pnpm"
+# 使用跨平台目录；同时保留旧的 macOS 路径一段时间，避免现有全局命令失联。
+PNPM_HOME = "{{env.HOME}}/.local/share/pnpm"
 # 自动将 pnpm / uv tool bin 加入 PATH
-_.path = ["{{env.HOME}}/Library/pnpm", "{{env.HOME}}/.local/bin"]
+_.path = ["{{env.HOME}}/.local/share/pnpm", "{{env.HOME}}/Library/pnpm", "{{env.HOME}}/.local/bin"]
 
 # --- 终端颜色强制开启 ---
 COLORTERM = "truecolor"
@@ -105,12 +106,23 @@ echo "✅ mise 工具链已同步。"
 """
 
 [tasks."setup:apps"]
-description = "通过 Brewfile 同步 Homebrew 应用、字体与插件"
+description = "同步当前平台的系统应用与插件"
+hide = true
+run = """
+case "$(uname -s)" in
+  Darwin) mise run setup:apps:darwin ;;
+  Linux) mise run setup:apps:linux ;;
+  *) echo "Unsupported OS: $(uname -s)"; exit 1 ;;
+esac
+"""
+
+[tasks."setup:apps:darwin"]
+description = "通过 Brewfile 同步 macOS 应用、字体与插件"
 hide = true
 run = """
 echo "📦 通过 Brewfile 同步 Homebrew 应用、字体与插件..."
 if ! command -v brew >/dev/null 2>&1; then
-  echo "Homebrew is required for setup:apps"
+  echo "Homebrew is required for setup:apps:darwin"
   exit 1
 fi
 
@@ -130,6 +142,13 @@ fi
 brew bundle install --file="$BREWFILE" --no-upgrade
 
 echo "✅ Homebrew 应用、字体与插件已同步。"
+"""
+
+[tasks."setup:apps:linux"]
+description = "Linux 的系统级依赖由 bootstrap 脚本负责"
+hide = true
+run = """
+echo "📦 Linux 系统依赖由 bootstrap/linux.sh 负责；setup 中跳过系统包安装。"
 """
 
 [tasks."setup:git"]
@@ -197,13 +216,24 @@ description = "校验 Ghostty 配置"
 hide = true
 depends = ["setup:apps", "setup:config"]
 run = """
-if command -v ghostty >/dev/null 2>&1; then
-  echo "👻 校验 Ghostty 配置..."
-  ghostty +validate-config >/dev/null
-  echo "✅ Ghostty 配置已校验。"
-else
-  echo "👻 Ghostty 未安装，跳过配置校验。"
-fi
+case "$(uname -s)" in
+  Darwin)
+    if command -v ghostty >/dev/null 2>&1; then
+      echo "👻 校验 Ghostty 配置..."
+      ghostty +validate-config >/dev/null
+      echo "✅ Ghostty 配置已校验。"
+    else
+      echo "👻 Ghostty 未安装，跳过配置校验。"
+    fi
+    ;;
+  Linux)
+    echo "👻 Linux 环境跳过 Ghostty 校验。"
+    ;;
+  *)
+    echo "Unsupported OS: $(uname -s)"
+    exit 1
+    ;;
+esac
 """
 
 [tasks."setup:ai"]
@@ -212,6 +242,8 @@ hide = true
 depends = ["setup:tools"]
 run = """
 echo "🤖 同步 AI CLI 工具链..."
+mkdir -p "$PNPM_HOME"
+pnpm config set --global global-bin-dir "$PNPM_HOME"
 pnpm add -g @anthropic-ai/claude-code @openai/codex @google/gemini-cli @fission-ai/openspec@latest
 echo "✅ AI 工具链已安装！请运行 'hash -r' 或重启终端。"
 """
@@ -224,6 +256,7 @@ run = """
 echo "🐚 校验受管 shell 配置..."
 [ -f "$HOME/.zshrc" ] || { echo "~/.zshrc is missing"; exit 1; }
 [ -f "$HOME/.config/zsh/shell.zsh" ] || { echo "~/.config/zsh/shell.zsh is missing"; exit 1; }
+[ -f "$HOME/.config/zsh/common.zsh" ] || { echo "~/.config/zsh/common.zsh is missing"; exit 1; }
 echo "✅ Shell 配置已就位。"
 """
 

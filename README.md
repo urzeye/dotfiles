@@ -1,61 +1,48 @@
 # dotfiles
 
-## 全新 macOS 装机
-
-### 0. 安装 Xcode Command Line Tools
+## 全新 macOS
 
 ```bash
-xcode-select --install
-```
-
-### 1. 安装 Homebrew
-
-```bash
-/bin/zsh -c "$(curl -fsSL https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)"
-```
-
-### 2. 让当前 shell 识别 `brew`
-
-```bash
-if [ -x /opt/homebrew/bin/brew ]; then
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-elif [ -x /usr/local/bin/brew ]; then
-  eval "$(/usr/local/bin/brew shellenv)"
-fi
-```
-
-### 3. 安装基础工具
-
-```bash
-brew install git chezmoi mise
-```
-
-### 4. 拉取并应用 dotfiles
-
-```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/urzeye/dotfiles/main/bootstrap/macos.sh)
+if [ -x /opt/homebrew/bin/brew ]; then eval "$(/opt/homebrew/bin/brew shellenv)"; elif [ -x /usr/local/bin/brew ]; then eval "$(/usr/local/bin/brew shellenv)"; fi
 chezmoi init --apply https://github.com/urzeye/dotfiles.git
-```
-
-### 5. 执行完整 setup
-
-```bash
 cd ~/.config/mise
 mise run -o keep-order setup
+exec zsh
 ```
 
-### 6. 让当前终端生效
-
-```bash
-source ~/.zshrc
-```
-
-### 7. 验证
+验证：
 
 ```bash
 mise ls --current
 chezmoi managed
 ghostty +validate-config
 brew bundle check --file="$HOME/.Brewfile" --no-upgrade
+```
+
+## 全新 Linux
+
+支持：
+
+- Debian / Ubuntu
+- Fedora
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/urzeye/dotfiles/main/bootstrap/linux.sh)
+export PATH="$HOME/.local/bin:$PATH"
+chezmoi init --apply https://github.com/urzeye/dotfiles.git
+cd ~/.config/mise
+mise run -o keep-order setup
+exec zsh
+```
+
+验证：
+
+```bash
+mise ls --current
+chezmoi managed
+lazygit --version
+tldr git
 ```
 
 ## 已有机器更新
@@ -76,8 +63,6 @@ source ~/.zshrc
 
 ## 离线安装
 
-### 只离线铺配置
-
 本地 git 仓库目录：
 
 ```bash
@@ -93,21 +78,10 @@ chezmoi init
 chezmoi apply
 ```
 
-### 完整离线装机
+完整 setup 仍需网络：
 
-提前准备：
-
-- Homebrew 本体
-- Homebrew formula / cask 缓存
-- `mise` 本体
-- `mise install` 运行时缓存
-- `pnpm add -g` 包缓存
-
-默认需要网络的步骤：
-
-- `brew bundle install`
-- `mise install`
-- `pnpm add -g ...`
+- macOS: `bootstrap/macos.sh`, `brew bundle install`, `mise install`, `pnpm add -g ...`
+- Linux: `bootstrap/linux.sh`, `mise install`, `pnpm add -g ...`
 
 ## 日常命令
 
@@ -117,6 +91,9 @@ chezmoi apply
 chezmoi edit ~/.zshrc
 chezmoi edit ~/.config/mise/config.toml
 chezmoi edit ~/.config/zsh/shell.zsh
+chezmoi edit ~/.config/zsh/common.zsh
+chezmoi edit ~/.config/zsh/platform/darwin.zsh
+chezmoi edit ~/.config/zsh/platform/linux.zsh
 chezmoi edit ~/.config/starship.toml
 chezmoi edit ~/.config/ghostty/config
 ```
@@ -174,21 +151,12 @@ git push
 
 先在 Mac App Store 登录 Apple ID。
 
-常用命令：
-
 ```bash
 mas search Amphetamine
 mas list
 mas get 937984704
 mas upgrade
 ```
-
-说明：
-
-- `mas search`：搜索 App Store 应用
-- `mas list`：列出当前通过 App Store 安装的应用
-- `mas get <id>`：安装免费应用
-- `mas upgrade`：更新已安装的 App Store 应用
 
 默认受管应用：
 
@@ -216,26 +184,14 @@ atuin stats
 
 日常使用：
 
-- 在终端里按 `Ctrl-r`，打开 Atuin 历史搜索界面
+- 在终端里按 `Ctrl-r`
 - 输入关键词后回车，直接把历史命令填回当前命令行
-- 不想跨项目串历史时，用 `atuin search --cwd` 只看当前目录
+- 不想跨项目串历史时，用 `atuin search --cwd`
 
-首次导入历史：
-
-```bash
-atuin import auto
-```
-
-如果只想导入 zsh 历史：
+只导入 zsh 历史：
 
 ```bash
 atuin import zsh
-```
-
-交互搜索：
-
-```bash
-atuin search -i
 ```
 
 非交互搜索：
@@ -244,12 +200,6 @@ atuin search -i
 atuin search pnpm
 atuin search git --cmd-only
 atuin search --cwd npm
-```
-
-统计：
-
-```bash
-atuin stats
 ```
 
 多机同步，可选：
@@ -262,45 +212,33 @@ atuin key
 atuin status
 ```
 
-说明：
-
-- `register`：注册 Atuin 官方同步账号
-- `login`：登录已有账号
-- `sync`：同步历史记录
-- `key`：导出加密密钥，给另一台机器复用
-- `status`：查看同步状态
-
-不做同步也能正常使用本地历史搜索。
-
 ## 受管文件
 
-- `~/.Brewfile`
 - `~/.gitconfig`
 - `~/.zshrc`
 - `~/.config/mise/config.toml`
 - `~/.config/zsh/shell.zsh`
+- `~/.config/zsh/common.zsh`
+- `~/.config/zsh/platform/darwin.zsh`
+- `~/.config/zsh/platform/linux.zsh`
 - `~/.config/starship.toml`
-- `~/.config/ghostty/config`
-- `~/Library/Application Support/lazygit/config.yml`
+- macOS: `~/.Brewfile`
+- macOS: `~/.config/ghostty/config`
+- macOS: `~/Library/Application Support/lazygit/config.yml`
+- Linux: `~/.config/lazygit/config.yml`
 
 ## 关键入口
 
-### `~/.Brewfile`
-
-Homebrew 公式、GUI 应用、字体、插件。
-
-### `~/.gitconfig`
-
-Git 全局配置。
-
 ### `~/.config/mise/config.toml`
 
-运行时、CLI 工具、环境变量、setup 任务。
+运行时、CLI 工具、环境变量、跨平台 setup 任务。
 
 当前任务：
 
 - `setup:tools`
 - `setup:apps`
+- `setup:apps:darwin`
+- `setup:apps:linux`
 - `setup:git`
 - `setup:config`
 - `setup:config:force`
@@ -310,11 +248,23 @@ Git 全局配置。
 
 ### `~/.zshrc`
 
-初始化 `mise`、`shell.zsh`、`zoxide`、`starship`、`zsh-autosuggestions`、`zsh-syntax-highlighting`。
+只保留 PATH 引导、`mise` 激活和 `shell.zsh` 入口。
 
 ### `~/.config/zsh/shell.zsh`
 
-环境变量、alias、function。
+Zsh 总入口，负责加载 `common.zsh` 和当前平台文件。
+
+### `~/.config/zsh/common.zsh`
+
+macOS / Linux 共享的环境变量、alias、function。
+
+### `~/.config/zsh/platform/darwin.zsh`
+
+macOS 专属 shell 配置。
+
+### `~/.config/zsh/platform/linux.zsh`
+
+Linux 专属 shell 配置。
 
 ## FAQ
 
@@ -334,17 +284,4 @@ mise trust ~/.local/share/chezmoi/private_dot_config/mise/config.toml
 - `mise` 管理的环境变量注入
 - 当前交互式 shell 的 PATH 上下文
 
-本仓库的 `~/.zshrc` 已经包含这行，不需要手动追加。
-
-### `private_dot_config`、`private_Library` 是什么
-
-`chezmoi` 源文件命名规则：
-
-- `dot_`：目标名以 `.` 开头
-- `private_`：按私有权限处理
-
-对应关系：
-
-- `private_dot_zshrc` -> `~/.zshrc`
-- `private_dot_config` -> `~/.config`
-- `private_Library` -> `~/Library`
+本仓库的 `~/.zshrc` 已经包含这行。

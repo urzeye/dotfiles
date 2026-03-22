@@ -1,11 +1,9 @@
-eval "$(mise activate zsh)"
-[ -f "$HOME/.config/zsh/shell.zsh" ] && source "$HOME/.config/zsh/shell.zsh"
-command -v atuin >/dev/null 2>&1 && eval "$(atuin init zsh)"
-eval "$(zoxide init zsh)"
-eval "$(starship init zsh)"
+# Keep user-local and package-manager bins early in PATH so the same .zshrc
+# works with Homebrew on macOS and ~/.local/bin installers on Linux.
+typeset -U path PATH
+[ -d "$HOME/.local/bin" ] && path=("$HOME/.local/bin" $path)
+[ -d /opt/homebrew/bin ] && path=(/opt/homebrew/bin /opt/homebrew/sbin $path)
+[ -d /usr/local/bin ] && path=(/usr/local/bin /usr/local/sbin $path)
 
-if command -v brew >/dev/null 2>&1; then
-  BREW_PREFIX="$(brew --prefix)"
-  [ -f "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ] && source "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
-  [ -f "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ] && source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-fi
+command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
+[ -f "$HOME/.config/zsh/shell.zsh" ] && source "$HOME/.config/zsh/shell.zsh"

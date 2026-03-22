@@ -1,1 +1,12 @@
 README.md
+{{- if eq .chezmoi.os "linux" }}
+.Brewfile
+.config/ghostty
+.config/ghostty/**
+Library
+Library/**
+{{- end }}
+{{- if eq .chezmoi.os "darwin" }}
+.config/lazygit
+.config/lazygit/**
+{{- end }}
