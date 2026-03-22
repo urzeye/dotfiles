@@ -17,13 +17,13 @@ starship = "latest"
 
 
 # --- 搜索与导航 ---
+fd = "latest"
 fzf = "latest"
 zoxide = "latest"
 ripgrep = "latest"
 
 # --- 文本查看 ---
 bat = "latest"
-fd = "latest"
 
 # --- 现代 ls 替代 ---
 eza = "latest"
@@ -247,30 +247,17 @@ tmp_file=$(mktemp)
 awk \
   -v start="$BLOCK_START" \
   -v end="$BLOCK_END" \
-  -v old1='eval "$(mise activate zsh)"' \
-  -v old2='source ~/.mise_generated_aliases.zsh' \
-  -v old3='[ -f "$HOME/.mise_generated_aliases.zsh" ] && source "$HOME/.mise_generated_aliases.zsh"' \
-  -v old4='[ -f "$HOME/.config/zsh/env.zsh" ] && source "$HOME/.config/zsh/env.zsh"' \
-  -v old5='[ -f "$HOME/.config/zsh/aliases.zsh" ] && source "$HOME/.config/zsh/aliases.zsh"' \
-  -v old6='[ -f "$HOME/.config/zsh/functions.zsh" ] && source "$HOME/.config/zsh/functions.zsh"' \
-  -v old7='eval "$(zoxide init zsh)"' \
-  -v old8='eval "$(starship init zsh)"' \
-  -v old9='source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh' \
-  -v old10='source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh' \
   '
   $0 == start { skip = 1; next }
   $0 == end { skip = 0; next }
   skip { next }
-  $0 == old1 || $0 == old2 || $0 == old3 || $0 == old4 || $0 == old5 || $0 == old6 || $0 == old7 || $0 == old8 || $0 == old9 || $0 == old10 { next }
   { print }
   ' "$ZSHRC" > "$tmp_file"
 
 cat <<'EOF' >> "$tmp_file"
 # >>> mise managed setup >>>
 eval "$(mise activate zsh)"
-[ -f "$HOME/.config/zsh/env.zsh" ] && source "$HOME/.config/zsh/env.zsh"
-[ -f "$HOME/.config/zsh/aliases.zsh" ] && source "$HOME/.config/zsh/aliases.zsh"
-[ -f "$HOME/.config/zsh/functions.zsh" ] && source "$HOME/.config/zsh/functions.zsh"
+[ -f "$HOME/.config/zsh/shell.zsh" ] && source "$HOME/.config/zsh/shell.zsh"
 eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
 
@@ -283,7 +270,6 @@ fi
 EOF
 
 mv "$tmp_file" "$ZSHRC"
-rm -f "$HOME/.mise_generated_aliases.zsh"
 echo "✅ Shell 初始化区块已更新。"
 """
 
