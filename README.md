@@ -49,7 +49,43 @@ lazygit --version
 tldr git
 ```
 
-## 已有机器更新
+## 离线安装
+
+本地 git 仓库目录：
+
+```bash
+chezmoi init --apply --guess-repo-url=false /path/to/dotfiles
+```
+
+解压后的普通目录：
+
+```bash
+mkdir -p ~/.local/share/chezmoi
+rsync -a /path/to/unzipped-dotfiles/ ~/.local/share/chezmoi/
+chezmoi init
+chezmoi apply
+```
+
+完整 setup 仍需网络：
+
+- macOS: `bootstrap/macos.sh`, `brew bundle install`, `mise install`, `pnpm add -g ...`
+- Linux: `bootstrap/linux.sh`, `mise install`, `pnpm add -g ...`
+
+## 日常流程
+
+本机改完后推到 GitHub：
+
+```bash
+chezmoi edit ~/.config/mise/config.toml
+chezmoi diff
+chezmoi cd
+git status
+git add .
+git commit -m "chore: update dotfiles"
+git push
+```
+
+其他机器同步：
 
 macOS：
 
@@ -76,93 +112,25 @@ chezmoi apply
 source ~/.zshrc
 ```
 
-## 离线安装
-
-本地 git 仓库目录：
+按需补装：
 
 ```bash
-chezmoi init --apply --guess-repo-url=false /path/to/dotfiles
-```
-
-解压后的普通目录：
-
-```bash
-mkdir -p ~/.local/share/chezmoi
-rsync -a /path/to/unzipped-dotfiles/ ~/.local/share/chezmoi/
-chezmoi init
-chezmoi apply
-```
-
-完整 setup 仍需网络：
-
-- macOS: `bootstrap/macos.sh`, `brew bundle install`, `mise install`, `pnpm add -g ...`
-- Linux: `bootstrap/linux.sh`, `mise install`, `pnpm add -g ...`
-
-## 日常命令
-
-Setup：
-
-```bash
-mise run setup
 mise run setup:java
 mise run setup:rust
 mise run setup:ai
 mise run setup:full
 ```
 
-编辑：
+常用维护命令：
 
 ```bash
-chezmoi edit ~/.config/mise/config.toml
 chezmoi edit ~/.zshrc
 chezmoi edit ~/.config/ghostty/config
-```
-
-进入源目录：
-
-```bash
 chezmoi cd
-```
-
-预览改动：
-
-```bash
-chezmoi diff
-```
-
-应用改动：
-
-```bash
-chezmoi apply
-```
-
-查看受管文件：
-
-```bash
 chezmoi managed
-```
-
-纳入新文件：
-
-```bash
 chezmoi add ~/.some/file
-```
-
-强制覆盖本地目标文件：
-
-```bash
 cd ~/.config/mise
 mise run setup:config:force
-```
-
-推送：
-
-```bash
-chezmoi cd
-git status
-git add .
-git commit -m "chore: update dotfiles"
-git push
 ```
 
 ## 常用工具
@@ -293,15 +261,3 @@ Linux 专属 shell 配置。
 ```bash
 mise trust ~/.local/share/chezmoi/private_dot_config/mise/config.toml
 ```
-
-### 安装完 `mise` 后，不往 `.zshrc` 里写 `eval "$(mise activate zsh)"` 行不行
-
-`mise` 命令通常还能用。
-
-不会自动生效的部分：
-
-- 进入目录自动切换工具版本
-- `mise` 管理的环境变量注入
-- 当前交互式 shell 的 PATH 上下文
-
-本仓库的 `~/.zshrc` 已经包含这行。
