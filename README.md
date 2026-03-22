@@ -32,8 +32,14 @@ bash <(curl -fsSL https://raw.githubusercontent.com/urzeye/dotfiles/main/bootstr
 export PATH="$HOME/.local/bin:$PATH"
 chezmoi init --apply https://github.com/urzeye/dotfiles.git
 cd ~/.config/mise
-mise run -o keep-order setup
+mise run -o keep-order setup:base
 exec zsh
+```
+
+如需 AI CLI，再额外执行：
+
+```bash
+mise run setup:ai
 ```
 
 验证：
@@ -236,6 +242,7 @@ atuin status
 当前任务：
 
 - `setup:tools`
+- `setup:base`
 - `setup:apps`
 - `setup:apps:darwin`
 - `setup:apps:linux`

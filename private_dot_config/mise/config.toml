@@ -63,7 +63,11 @@ GOPROXY = "https://goproxy.cn,direct"
 # 使用跨平台目录；同时保留旧的 macOS 路径一段时间，避免现有全局命令失联。
 PNPM_HOME = "{{env.HOME}}/.local/share/pnpm"
 # 自动将 pnpm / uv tool bin 加入 PATH
-_.path = ["{{env.HOME}}/.local/share/pnpm", "{{env.HOME}}/Library/pnpm", "{{env.HOME}}/.local/bin"]
+_.path = [
+	"{{env.HOME}}/.local/share/pnpm",
+	"{{env.HOME}}/Library/pnpm",
+	"{{env.HOME}}/.local/bin",
+]
 
 # --- 终端颜色强制开启 ---
 COLORTERM = "truecolor"
@@ -86,6 +90,20 @@ depends = [
 run = """
 echo "📋 Setup 摘要"
 echo "✅ 全部任务已完成；如需让当前终端立即生效，请执行 'source ~/.zshrc'。"
+"""
+
+[tasks."setup:base"]
+description = "安装基础工具并同步配置（不含 AI 工具链）"
+depends = [
+	"setup:tools",
+	"setup:apps",
+	"setup:git",
+	"setup:config",
+	"setup:shell",
+]
+run = """
+echo "📋 Base Setup 摘要"
+echo "✅ 基础环境已完成；如需让当前终端立即生效，请执行 'source ~/.zshrc'。"
 """
 
 [tasks."setup:tools"]
