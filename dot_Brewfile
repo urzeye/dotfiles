@@ -2,6 +2,7 @@ brew "atuin"
 brew "chezmoi"
 brew "mas"
 brew "mole"
+brew "tlrc"
 brew "zsh-autosuggestions"
 brew "zsh-syntax-highlighting"
 

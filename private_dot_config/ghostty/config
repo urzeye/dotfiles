@@ -1,9 +1,9 @@
-# 字体设置，依赖本机已安装对应 Nerd Font。
+# 字体设置，依赖本机已安装对应 Nerd Font
 font-family = "JetBrainsMono Nerd Font"
 font-size = 14
 font-feature = "liga"
 
-# 视觉效果：半透明 + 模糊 + 隐藏标题栏，保持 macOS 风格。
+# 视觉效果：半透明 + 模糊 + 隐藏标题栏，保持 macOS 风格
 theme = "Catppuccin Mocha"
 macos-titlebar-style = hidden
 background-opacity = 0.95
@@ -11,19 +11,19 @@ background-blur = 20
 cursor-style = block
 cursor-style-blink = true
 
-# 布局：给内容区留一点呼吸感。
+# 布局：给内容区留一点呼吸感
 window-padding-x = 10
 window-padding-y = 10
 
-# 交互体验。
+# 交互体验
 copy-on-select = clipboard
 mouse-scroll-multiplier = 2
 
-# 分屏快捷键：Cmd+D 左右分屏，Cmd+Shift+D 上下分屏。
+# 分屏快捷键：Cmd+D 左右分屏，Cmd+Shift+D 上下分屏
 keybind = super+d=new_split:right
 keybind = super+shift+d=new_split:down
 
-# 分屏导航：Cmd+Option+方向键在各个 split 间切换。
+# 分屏导航：Cmd+Option+方向键在各个 split 间切换
 keybind = super+alt+arrow_left=goto_split:left
 keybind = super+alt+arrow_right=goto_split:right
 keybind = super+alt+arrow_up=goto_split:up
