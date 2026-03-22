@@ -29,10 +29,6 @@ brew bundle check --file="$HOME/.Brewfile" --no-upgrade
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/urzeye/dotfiles/main/bootstrap/linux.sh)
-export PATH="$HOME/.local/bin:$PATH"
-chezmoi init --apply https://github.com/urzeye/dotfiles.git
-cd ~/.config/mise
-mise run -o keep-order setup:base
 exec zsh
 ```
 

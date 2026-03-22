@@ -5,6 +5,7 @@ font-feature = "liga"
 
 # 视觉效果：半透明 + 模糊 + 隐藏标题栏，保持 macOS 风格
 theme = "Catppuccin Mocha"
+term = xterm-256color
 macos-titlebar-style = hidden
 background-opacity = 0.95
 background-blur = 20
