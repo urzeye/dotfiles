@@ -11,11 +11,11 @@ set scrolloff=7
 set wildmenu
 set showmatch
 set matchtime=2
-set foldcolumn=1
 set laststatus=2
 set showtabline=2
 set cmdheight=2
 set wrap
+set updatetime=1000
 
 " --- Search ---
 set ignorecase
@@ -35,14 +35,18 @@ set smartindent
 set autoread
 set switchbuf=useopen,usetab,newtab
 
-" 检测到文件被外部改动时自动重新读取。
-autocmd CursorHold,CursorHoldI * checktime
+augroup dotfiles_vimrc
+  autocmd!
 
-" 重新打开文件时跳回上次退出的位置。
-autocmd BufReadPost *
-  \ if line("'\"") > 1 && line("'\"") <= line("$") |
-  \   execute "normal! g`\"" |
-  \ endif
+  " 检测到文件被外部改动时自动重新读取。
+  autocmd CursorHold,CursorHoldI * checktime
+
+  " 重新打开文件时跳回上次退出的位置。
+  autocmd BufReadPost *
+    \ if line("'\"") > 1 && line("'\"") <= line("$") |
+    \   execute "normal! g`\"" |
+    \ endif
+augroup END
 
 " --- Undo ---
 set undofile
@@ -53,8 +57,9 @@ endif
 let &undodir = s:undo_dir
 
 " --- Folding ---
-set foldmethod=syntax
+set foldmethod=manual
 set nofoldenable
+set foldcolumn=0
 
 " --- Keymaps ---
 " 快速退出插入模式；在可视模式下也允许用 jk 直接回到 normal。
