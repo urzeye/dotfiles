@@ -1,12 +1,16 @@
 "$schema" = "https://starship.rs/config-schema.json"
 add_newline = true
 
-# 第一行展示目录、Git 状态、当前语言/包管理信息与耗时；第二行只留输入光标。
-format = "$directory$git_branch$git_status$fill$python$nodejs$golang$java$rust$package$cmd_duration$line_break$character"
+# 第一行展示目录、Git 状态、语言/包管理信息与时间/耗时；
+# 第二行展示主机、shell、sudo 上下文与输入光标。
+format = "$directory$git_branch$git_state$git_status$fill$python$nodejs$golang$java$rust$package$time$cmd_duration$status$line_break$hostname$shell$sudo$jobs$character"
 
 [directory]
 style = "bold cyan"
 truncation_length = 3
+truncation_symbol = "…/"
+read_only = " 󰌾"
+read_only_style = "bold red"
 
 [character]
 success_symbol = "[➜](bold green)"
@@ -15,6 +19,10 @@ error_symbol = "[➜](bold red)"
 [git_branch]
 symbol = " "
 style = "bold purple"
+
+[git_state]
+style = "bold yellow"
+format = '\([$state( $progress_current/$progress_total)]($style)\) '
 
 [git_status]
 style = "bold yellow"
@@ -27,6 +35,45 @@ symbol = " "
 min_time = 2000
 style = "yellow"
 format = "took [$duration]($style) "
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bold dimmed white"
+format = "at [$time]($style) "
+
+[status]
+disabled = false
+style = "bold red"
+format = "[$status]($style) "
+pipestatus = true
+
+[hostname]
+ssh_only = true
+format = "[$ssh_symbol$hostname]($style) "
+style = "bold dimmed green"
+
+[shell]
+disabled = false
+format = "[$indicator]($style) "
+style = "bold dimmed white"
+bash_indicator = "bash"
+zsh_indicator = "zsh"
+fish_indicator = "fish"
+unknown_indicator = "zsh"
+
+[sudo]
+disabled = false
+format = "[$symbol]($style) "
+symbol = "sudo"
+style = "bold yellow"
+
+[jobs]
+symbol = "✦ "
+style = "bold blue"
+symbol_threshold = 1
+number_threshold = 2
+format = "[$symbol$number]($style) "
 
 [python]
 symbol = " "
