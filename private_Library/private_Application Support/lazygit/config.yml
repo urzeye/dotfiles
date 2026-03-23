@@ -1,13 +1,66 @@
-
 gui:
-  showIcons: true
-  mouseEventsEnabled: true
+  nerdFontsVersion: '3'
+  mouseEvents: true
   border: 'rounded'
+  showNumstatInFilesView: true
+  splitDiff: always
 git:
-  paging:
-    colorArg: always
-    pager: delta --dark --paging=never --line-numbers --syntax-theme='Monokai Extended'
+  pagers:
+    - colorArg: always
+      pager: delta --dark --paging=never --line-numbers --syntax-theme='Monokai Extended'
 os:
   # 保留 lazygit 自己的 {{filename}} / {{line}} 模板变量。
   edit: 'code --goto {{filename}}:{{line}}'
-
+  open: 'open "{{filename}}"'
+  openLink: 'open "{{link}}"'
+update:
+  method: never
+notARepository: quit
+customCommands:
+  # GitHub-heavy workflows for open source work: open the current repo, PR, CI,
+  # issues, or the selected file/commit directly in the browser.
+  - key: '<c-o>'
+    context: 'global'
+    description: 'GitHub: open repository'
+    command: 'gh browse'
+    output: none
+  - key: '<c-a>'
+    context: 'global'
+    description: 'GitHub: open Actions page'
+    command: 'gh browse --actions'
+    output: none
+  - key: '<c-p>'
+    context: 'global'
+    description: 'GitHub: open PR for current branch or create one'
+    command: 'gh pr view --web || gh pr create --web'
+    output: terminal
+  - key: '<c-t>'
+    context: 'global'
+    description: 'GitHub: open checks for current branch PR'
+    command: 'gh pr checks --web'
+    output: terminal
+  - key: '<c-l>'
+    context: 'global'
+    description: 'GitHub: open issues list'
+    command: 'gh issue list --web'
+    output: none
+  - key: '<c-n>'
+    context: 'global'
+    description: 'GitHub: create issue in browser'
+    command: 'gh issue create --web'
+    output: terminal
+  - key: '<c-o>'
+    context: 'files'
+    description: 'GitHub: open selected file on current branch'
+    command: 'gh browse {{.SelectedFile.Name | quote}} --branch "$(git branch --show-current)"'
+    output: none
+  - key: '<c-o>'
+    context: 'commits,subCommits'
+    description: 'GitHub: open selected commit'
+    command: 'gh browse {{.SelectedCommit.Hash}}'
+    output: none
+  - key: '<c-o>'
+    context: 'commitFiles'
+    description: 'GitHub: open selected file at selected commit'
+    command: 'gh browse {{.SelectedCommitFile.Name | quote}} --commit {{.SelectedCommit.Hash}}'
+    output: none
