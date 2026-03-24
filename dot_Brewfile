@@ -6,10 +6,10 @@ brew "zsh-syntax-highlighting"
 
 mas "Amphetamine", id: 937984704
 
-cask "flykey"
+cask "karabiner-elements"
 cask "font-jetbrains-mono-nerd-font"
 cask "ghostty"
-cask "jetbrains-toolbox"
-cask "jordanbaird-ice"
-cask "karabiner-elements"
 cask "visual-studio-code"
+cask "jetbrains-toolbox"
+cask "flykey"
+cask "jordanbaird-ice"
