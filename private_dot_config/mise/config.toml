@@ -20,6 +20,7 @@ uv = "latest"
 atuin = "latest"
 lazygit = "latest"
 starship = "latest"
+"github:urzeye/lazyssh" = "latest"
 
 # --- 搜索与导航 ---
 fd = "latest"
@@ -86,6 +87,7 @@ depends = [
 	"setup:apps",
 	"setup:git",
 	"setup:config",
+	"setup:ssh",
 	"setup:ghostty",
 	"setup:shell",
 ]
@@ -123,6 +125,7 @@ mise install \
   atuin \
   lazygit \
   starship \
+  github:urzeye/lazyssh \
   fd \
   fzf \
   zoxide \
@@ -264,6 +267,33 @@ if [ ! -d "$CHEZMOI_SOURCE_DIR/.git" ]; then
 else
   chezmoi apply --force
   echo "✅ chezmoi 配置已强制应用。"
+fi
+"""
+
+[tasks."setup:ssh"]
+description = "初始化由 lazyssh 管理的本地 SSH 配置"
+hide = true
+depends = ["setup:config"]
+run = """
+echo "🔐 初始化 SSH 工作流..."
+
+mkdir -p "$HOME/.ssh" "$HOME/.ssh/config.d"
+chmod 700 "$HOME/.ssh"
+
+LOCAL_SSH_CONFIG="$HOME/.ssh/config.local"
+
+if [ ! -f "$LOCAL_SSH_CONFIG" ]; then
+  cat > "$LOCAL_SSH_CONFIG" <<'EOF'
+# Managed by you and lazyssh. This file is intentionally not managed by chezmoi.
+# ~/.ssh/config includes this file, plus config.d and OrbStack when present.
+
+# Add your SSH hosts below, or manage them with lazyssh.
+EOF
+  chmod 600 "$LOCAL_SSH_CONFIG"
+  echo "✅ 已创建 ~/.ssh/config.local，可直接用 lazyssh 管理。"
+else
+  chmod 600 "$LOCAL_SSH_CONFIG" 2>/dev/null || true
+  echo "✅ 检测到现有 ~/.ssh/config.local，已保留。"
 fi
 """
 

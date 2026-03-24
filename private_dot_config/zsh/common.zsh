@@ -28,6 +28,7 @@ alias jqp='jq -C -S'
 
 # High-frequency Git shortcuts that still make sense even with lazygit.
 alias lg='lazygit'
+alias lssh='lazyssh'
 alias gst='git status'        # gst = git status
 alias gcm='git commit -m'     # gcm = git commit message
 alias gp='git push'           # gp = git push
@@ -90,6 +91,33 @@ fco() {
   local branch
   branch=$(git branch --all | grep -v "[*]" | fzf +m) &&
   git switch $(echo "$branch" | sed "s/.* //" | sed "s#remotes/[^/]*/##")
+}
+
+# Use the writable local SSH config so lazyssh changes survive chezmoi apply.
+lazyssh() {
+  local root_config_path="$HOME/.ssh/config"
+  local managed_config_path="$HOME/.ssh/config.local"
+
+  if ! whence -p lazyssh >/dev/null 2>&1; then
+    echo "lazyssh 未安装。先运行 'mr setup'。"
+    return 1
+  fi
+
+  if [ ! -f "$root_config_path" ]; then
+    echo "~/.ssh/config 不存在。先运行 'chezmoi apply'。"
+    return 1
+  fi
+
+  if [ ! -f "$managed_config_path" ]; then
+    echo "~/.ssh/config.local 不存在。先运行 'mr setup:ssh'，或从 ~/.ssh/config.local.example 复制一份。"
+    return 1
+  fi
+
+  command lazyssh \
+    --sshconfig "$root_config_path" \
+    --managed-mode \
+    --managed-sshconfig "$managed_config_path" \
+    "$@"
 }
 
 # wx = watch exec, rerun the full command whenever files change.

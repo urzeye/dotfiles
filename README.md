@@ -16,6 +16,7 @@ mise ls --current
 chezmoi managed
 ghostty +validate-config
 brew bundle check --file="$HOME/.Brewfile" --no-upgrade
+lazyssh --version
 ```
 
 ## 全新 Linux
@@ -44,6 +45,7 @@ mise run setup:ai
 mise ls --current
 chezmoi managed
 lazygit --version
+lazyssh --version
 tldr git
 ```
 
@@ -116,6 +118,7 @@ source ~/.zshrc
 mise run setup:java
 mise run setup:rust
 mise run setup:ai
+mise run setup:ssh
 mise run setup:full
 ```
 
@@ -200,6 +203,19 @@ atuin status
 
 ## SSH
 
+这套 dotfiles 里，SSH 和 `lazyssh` 的分工是：
+
+- `~/.ssh/config` 是由 `chezmoi` 管理的 root config，保留统一的 `Include` 骨架
+- `~/.ssh/config.local` 是真正可写的个人主机文件，由你和 `lazyssh` 共同维护
+- `~/.ssh/config.d/00-defaults.conf` 放跨机器通用默认项
+- shell 里的 `lazyssh` / `lssh` 已自动附带 `--sshconfig ~/.ssh/config --managed-mode --managed-sshconfig ~/.ssh/config.local`
+
+这样做的好处是：
+
+- `chezmoi apply` 不会覆盖你在 `lazyssh` 里新增或修改的主机
+- `lazyssh` 仍然能读取 `config.d` 和 `OrbStack` 的 include
+- 普通 `ssh my-server` 和 `lazyssh` 会落在同一套真实配置上
+
 生成密钥：
 
 ```bash
@@ -231,11 +247,18 @@ chmod 600 ~/.ssh/authorized_keys
 本仓库只管理 SSH 骨架，不保存真实服务器：
 
 ```bash
+mr setup:ssh
+lazyssh
+```
+
+如果你想手动从示例开始：
+
+```bash
 cp ~/.ssh/config.local.example ~/.ssh/config.local
 vim ~/.ssh/config.local
 ```
 
-示例：
+示例内容：
 
 ```sshconfig
 Host my-server
@@ -248,6 +271,7 @@ Host my-server
 连接：
 
 ```bash
+lazyssh
 ssh my-server
 ```
 
@@ -270,6 +294,10 @@ ssh my-server
 - macOS: `~/Library/Application Support/lazygit/config.yml`
 - Linux: `~/.config/lazygit/config.yml`
 
+本地持久文件，不受 `chezmoi` 管理：
+
+- `~/.ssh/config.local`
+
 ## 关键入口
 
 ### `~/.config/mise/config.toml`
@@ -282,6 +310,7 @@ ssh my-server
 - `mise run setup:java`
 - `mise run setup:rust`
 - `mise run setup:ai`
+- `mise run setup:ssh`
 - `mise run setup:full`
 
 ### `~/.zshrc`

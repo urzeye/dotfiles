@@ -1,3 +1,5 @@
+# Root SSH config kept under chezmoi control.
+# lazyssh reads this root config, then writes personal hosts to ~/.ssh/config.local.
 Include ~/.orbstack/ssh/config
 Include ~/.ssh/config.d/*.conf
 Include ~/.ssh/config.local

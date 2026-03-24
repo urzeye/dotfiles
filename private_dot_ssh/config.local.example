@@ -1,4 +1,6 @@
-# Copy this file to ~/.ssh/config.local and replace the example values.
+# Copy this file to ~/.ssh/config.local if you want to seed it manually.
+# The root ~/.ssh/config already includes this file.
+# The setup task also creates a minimal writable ~/.ssh/config.local for lazyssh.
 #
 # cp ~/.ssh/config.local.example ~/.ssh/config.local
 
