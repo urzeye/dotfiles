@@ -95,7 +95,7 @@ macOS：
 chezmoi update
 cd ~/.config/mise
 mise run -o keep-order setup:full
-source ~/.zshrc
+exec $SHELL -l
 ```
 
 Linux：
@@ -104,14 +104,14 @@ Linux：
 chezmoi update
 cd ~/.config/mise
 mise run -o keep-order setup
-source ~/.zshrc
+exec $SHELL -l
 ```
 
-只同步配置文件：
+只同步本机 source state，不拉取远端：
 
 ```bash
 chezmoi apply
-source ~/.zshrc
+exec $SHELL -l
 ```
 
 按需补装：
@@ -347,13 +347,15 @@ Linux 专属 shell 配置。
 
 现在默认已经通过全局 `mise` 配置自动信任 `~/.local/share/chezmoi`。
 
-注意：`chezmoi apply` 只会应用本机已有的 source state，不会先从 GitHub 拉取最新改动。
+注意：
+
+- `chezmoi update` 默认会先拉取远端，再自动执行 `apply`
+- `chezmoi apply` 只会应用本机已有的 source state，不会先从 GitHub 拉取最新改动
 
 如果你是在更新这份 dotfiles 之前就已经打开了终端，或者在另一台机器上同步这份仓库，请执行：
 
 ```bash
 chezmoi update
-chezmoi apply
 exec $SHELL -l
 ```
 
