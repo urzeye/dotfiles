@@ -1,5 +1,4 @@
 brew "chezmoi"
-brew "dust"
 brew "mas"
 brew "mole"
 brew "zsh-autosuggestions"
