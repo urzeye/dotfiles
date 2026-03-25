@@ -343,9 +343,12 @@ Linux 专属 shell 配置。
 
 现在默认已经通过全局 `mise` 配置自动信任 `~/.local/share/chezmoi`。
 
-如果你是在更新这份 dotfiles 之前就已经打开了终端，重新执行一次：
+注意：`chezmoi apply` 只会应用本机已有的 source state，不会先从 GitHub 拉取最新改动。
+
+如果你是在更新这份 dotfiles 之前就已经打开了终端，或者在另一台机器上同步这份仓库，请执行：
 
 ```bash
+chezmoi update
 chezmoi apply
 exec $SHELL -l
 ```
