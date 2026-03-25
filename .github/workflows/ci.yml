@@ -43,13 +43,15 @@ jobs:
         shell: bash
         run: |
           export PATH="$HOME/.local/bin:$PATH"
-          eval "$("$HOME/.local/bin/mise" activate bash)"
 
           bash -n bootstrap/*.sh
           zsh -n private_dot_config/zsh/*.zsh private_dot_config/zsh/platform/*.zsh
-          shellcheck bootstrap/*.sh
-          taplo check private_dot_config/mise/config.toml private_dot_config/starship.toml
-          yamllint -c .yamllint.yml .github/workflows/ci.yml private_dot_config/lazygit/config.yml "private_Library/private_Application Support/lazygit/config.yml"
+          mise x shellcheck@0.11.0 -- shellcheck bootstrap/*.sh
+          mise x taplo@0.10.0 -- taplo check private_dot_config/mise/config.toml private_dot_config/starship.toml
+          mise x yamllint@1.38.0 -- yamllint -c .yamllint.yml \
+            .github/workflows/ci.yml \
+            private_dot_config/lazygit/config.yml \
+            "private_Library/private_Application Support/lazygit/config.yml"
 
       - name: Validate chezmoi apply in a temp home
         shell: bash
