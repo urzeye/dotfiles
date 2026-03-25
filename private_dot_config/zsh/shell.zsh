@@ -48,6 +48,12 @@ if [[ -o interactive ]] && [[ -t 1 ]]; then
     bindkey -M emacs '^[r' atuin-search
     bindkey -M viins '^[r' atuin-search-viins
   fi
+
+  autoload -Uz down-line-or-search
+  bindkey -M emacs '^[[B' down-line-or-search
+  bindkey -M viins '^[[B' down-line-or-search
+  bindkey -M emacs '^[OB' down-line-or-search
+  bindkey -M viins '^[OB' down-line-or-search
 fi
 
 unfunction _zsh_source_if_exists
