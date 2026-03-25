@@ -73,16 +73,18 @@ chezmoi apply
 
 ## 日常流程
 
-本机改完后推到 GitHub：
+本机改完后提 PR：
 
 ```bash
 chezmoi edit ~/.config/mise/config.toml
 chezmoi diff
 chezmoi cd
+git switch -c chore/some-change
 git status
 git add .
 git commit -m "chore: update dotfiles"
-git push
+git push -u origin HEAD
+gh pr create --web
 ```
 
 其他机器同步：
@@ -118,6 +120,7 @@ source ~/.zshrc
 mise run setup:java
 mise run setup:rust
 mise run setup:ai
+mise run setup:secrets
 mise run setup:ssh
 mise run setup:full
 ```
@@ -277,12 +280,37 @@ lazyssh
 ssh my-server
 ```
 
+## Secrets
+
+当前先预留一个稳定的本机 secrets 入口，后续可以再切到 `chezmoi age`、1Password 或系统钥匙串：
+
+- `~/.config/env/secrets.example.sh` 由仓库提供，只放示例变量
+- `~/.config/env/secrets.sh` 是本机私有文件，不受 `chezmoi` 管理
+- shell 启动时会自动 source `~/.config/env/secrets.sh`
+- 如果你给 `GITHUB_TOKEN` 赋值，`mise` 安装 GitHub-backed CLI 时也更不容易撞 API rate limit
+
+初始化占位文件：
+
+```bash
+mise run setup:secrets
+```
+
+常见变量示例：
+
+```bash
+export GITHUB_TOKEN=""
+export OPENAI_API_KEY=""
+export ANTHROPIC_API_KEY=""
+export GEMINI_API_KEY=""
+```
+
 ## 受管文件
 
 - `~/.gitconfig`
 - `~/.ssh/config`
 - `~/.ssh/config.d/00-defaults.conf`
 - `~/.ssh/config.local.example`
+- `~/.config/env/secrets.example.sh`
 - `~/.vimrc`
 - `~/.zshrc`
 - `~/.config/mise/config.toml`
@@ -299,6 +327,7 @@ ssh my-server
 本地持久文件，不受 `chezmoi` 管理：
 
 - `~/.ssh/config.local`
+- `~/.config/env/secrets.sh`
 
 ## 关键入口
 
@@ -312,6 +341,7 @@ ssh my-server
 - `mise run setup:java`
 - `mise run setup:rust`
 - `mise run setup:ai`
+- `mise run setup:secrets`
 - `mise run setup:ssh`
 - `mise run setup:full`
 

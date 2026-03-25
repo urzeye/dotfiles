@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install OS dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl zsh
+
+      - name: Install chezmoi
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install mise
+        run: |
+          curl https://mise.run | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install validation tools
+        shell: bash
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          eval "$("$HOME/.local/bin/mise" activate bash)"
+          mise install shellcheck@0.11.0 taplo@0.10.0 yamllint@1.38.0
+
+      - name: Run static checks
+        shell: bash
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          eval "$("$HOME/.local/bin/mise" activate bash)"
+
+          bash -n bootstrap/*.sh
+          zsh -n private_dot_config/zsh/*.zsh private_dot_config/zsh/platform/*.zsh
+          shellcheck bootstrap/*.sh
+          taplo check private_dot_config/mise/config.toml private_dot_config/starship.toml
+          yamllint -c .yamllint.yml .github/workflows/ci.yml private_dot_config/lazygit/config.yml "private_Library/private_Application Support/lazygit/config.yml"
+
+      - name: Validate chezmoi apply in a temp home
+        shell: bash
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          tmp_home="$(mktemp -d)"
+          chezmoi init --apply --guess-repo-url=false -D "$tmp_home" "$GITHUB_WORKSPACE"

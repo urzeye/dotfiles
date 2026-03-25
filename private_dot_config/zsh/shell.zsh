@@ -30,6 +30,10 @@ case "$OSTYPE" in
   linux*) _zsh_source_if_exists "$ZSH_CONFIG_DIR/platform/linux.zsh" ;;
 esac
 
+# Machine-local secrets live outside the repo for now; this keeps a stable hook
+# in place until we move to chezmoi age or a secret manager.
+_zsh_source_if_exists "$HOME/.config/env/secrets.sh"
+
 # Only load ZLE/TTY-focused integrations when the shell is attached to a real
 # terminal. This keeps automation like `zsh -ic ...` from printing warnings.
 if [[ -o interactive ]] && [[ -t 1 ]]; then
