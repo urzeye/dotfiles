@@ -73,16 +73,18 @@ chezmoi apply
 
 ## 日常流程
 
-本机改完后推到 GitHub：
+本机改完后提 PR：
 
 ```bash
 chezmoi edit ~/.config/mise/config.toml
 chezmoi diff
 chezmoi cd
+git switch -c chore/some-change
 git status
 git add .
 git commit -m "chore: update dotfiles"
-git push
+git push -u origin HEAD
+gh pr create --web
 ```
 
 其他机器同步：

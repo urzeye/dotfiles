@@ -1,4 +1,7 @@
 README.md
+.github
+.github/**
+.yamllint.yml
 {{- if eq .chezmoi.os "linux" }}
 .Brewfile
 .config/ghostty

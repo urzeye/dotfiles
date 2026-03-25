@@ -95,7 +95,7 @@ fco() {
 }
 
 # Delete local branches that are already merged into a base branch.
-gbclean() {
+gbc() {
   local base_branch="${1:-main}"
   local current_branch
   local -a merged_branches

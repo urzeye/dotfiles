@@ -17,16 +17,16 @@ tokei = "latest"
 uv = "latest"
 
 # --- 现代终端增强 ---
-atuin = "latest"
-lazygit = "latest"
-starship = "latest"
-"github:urzeye/lazyssh" = "latest"
+atuin = "18.13.3"
+lazygit = "0.60.0"
+starship = "1.24.2"
+"github:urzeye/lazyssh" = "0.5.2"
 
 # --- 搜索与导航 ---
-fd = "latest"
-fzf = "latest"
+fd = "10.4.2"
+fzf = "0.70.0"
 zoxide = "latest"
-ripgrep = "latest"
+ripgrep = "15.1.0"
 
 # --- 文本查看 ---
 bat = "latest"
@@ -35,18 +35,20 @@ bat = "latest"
 eza = "latest"
 
 # --- 辅助工具 ---
-jq = "latest"
-shellcheck = "latest"
-actionlint = "latest"
+jq = "1.8.1"
+shellcheck = "0.11.0"
+actionlint = "1.7.11"
 usage = "latest"
-gh = "latest"
-delta = "latest"
-yq = "latest"
-just = "latest"
+gh = "2.88.1"
+delta = "0.19.0"
+yq = "4.52.4"
+just = "1.47.1"
 bottom = "latest"
 gping = "latest"
 tlrc = "latest"
 watchexec = "latest"
+taplo = "0.10.0"
+yamllint = "1.38.0"
 
 [env]
 # --- 1. Python / pip / uv ---
@@ -143,14 +145,27 @@ mise install \
   bottom \
   gping \
   tlrc \
-  watchexec
+  watchexec \
+  taplo \
+  yamllint
 
-# httpie 缺失时再安装，避免每次 setup 都触发无意义的升级检查与噪音输出。
-if ! uv tool list | grep -q '^httpie '; then
-  uv tool install httpie
-else
-  echo "httpie is already installed"
-fi
+ensure_uv_tool() {
+  spec="$1"
+  name="$2"
+
+  if ! uv tool list | grep -q "^${name} "; then
+    uv tool install "$spec"
+  else
+    echo "$name is already installed"
+  fi
+}
+
+# uv tool 只保留在工具注册表里不方便统一管理的少数 CLI。
+ensure_uv_tool httpie httpie
+ensure_uv_tool git-filter-repo==2.47.0 git-filter-repo
+
+# shfmt 用 Go 直接安装，避开上游 GitHub Release 资产命名差异带来的失败。
+GOBIN="$HOME/.local/bin" go install mvdan.cc/sh/v3/cmd/shfmt@v3.13.0
 
 echo "✅ 基础工具链已同步。"
 """

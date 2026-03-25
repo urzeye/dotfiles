@@ -19,6 +19,15 @@
 [fetch]
 	prune = true
 
+[pull]
+	ff = only
+
+[rebase]
+	autoStash = true
+
+[push]
+	autoSetupRemote = true
+
 [rerere]
 	enabled = true
 
