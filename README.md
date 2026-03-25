@@ -173,7 +173,9 @@ atuin stats
 
 日常使用：
 
-- 在终端里按 `Ctrl-r`
+- `Ctrl-r` 打开 `fzf` 历史检索
+- `Ctrl-g` 或 `Alt-r` 打开 `atuin` 全屏历史搜索
+- 上箭头按当前前缀调用 `atuin` 历史搜索
 - 输入关键词后回车，直接把历史命令填回当前命令行
 - 不想跨项目串历史时，用 `atuin search --cwd`
 

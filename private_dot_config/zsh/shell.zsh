@@ -40,6 +40,14 @@ if [[ -o interactive ]] && [[ -t 1 ]]; then
 
   _zsh_source_share_plugin zsh-autosuggestions zsh-autosuggestions.zsh
   _zsh_source_share_plugin zsh-syntax-highlighting zsh-syntax-highlighting.zsh
+
+  # Keep Ctrl-R for fzf history while still exposing Atuin's full-screen search.
+  if (( ${+widgets[atuin-search]} )); then
+    bindkey -M emacs '^G' atuin-search
+    bindkey -M viins '^G' atuin-search-viins
+    bindkey -M emacs '^[r' atuin-search
+    bindkey -M viins '^[r' atuin-search-viins
+  fi
 fi
 
 unfunction _zsh_source_if_exists
