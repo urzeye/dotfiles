@@ -89,7 +89,6 @@ depends = [
 	"setup:apps",
 	"setup:git",
 	"setup:config",
-	"setup:secrets",
 	"setup:ssh",
 	"setup:ghostty",
 	"setup:shell",
@@ -283,34 +282,6 @@ if [ ! -d "$CHEZMOI_SOURCE_DIR/.git" ]; then
 else
   chezmoi apply --force
   echo "✅ chezmoi 配置已强制应用。"
-fi
-"""
-
-[tasks."setup:secrets"]
-description = "初始化本机 secrets 占位文件"
-hide = true
-depends = ["setup:config"]
-run = """
-echo "🔏 初始化本机 secrets 占位..."
-
-mkdir -p "$HOME/.config/env"
-
-SECRETS_FILE="$HOME/.config/env/secrets.sh"
-SECRETS_EXAMPLE="$HOME/.config/env/secrets.example.sh"
-
-if [ ! -f "$SECRETS_FILE" ]; then
-  if [ -f "$SECRETS_EXAMPLE" ]; then
-    cp "$SECRETS_EXAMPLE" "$SECRETS_FILE"
-  else
-    cat > "$SECRETS_FILE" <<'EOF'
-# Machine-local secrets. Keep this file out of git.
-EOF
-  fi
-  chmod 600 "$SECRETS_FILE" 2>/dev/null || true
-  echo "✅ 已创建 ~/.config/env/secrets.sh 占位文件。"
-else
-  chmod 600 "$SECRETS_FILE" 2>/dev/null || true
-  echo "✅ 检测到现有 ~/.config/env/secrets.sh，已保留。"
 fi
 """
 
