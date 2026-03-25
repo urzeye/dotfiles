@@ -348,3 +348,4 @@ echo "✅ Shell 配置已就位。"
 [settings]
 experimental = true
 plugin_autoupdate_last_check_duration = "24h"
+trusted_config_paths = ["~/.local/share/chezmoi"]

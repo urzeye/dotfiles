@@ -341,6 +341,13 @@ Linux 专属 shell 配置。
 
 ### 进入 `chezmoi` 源目录时，`mise` 提示 trust
 
+现在默认已经通过全局 `mise` 配置自动信任 `~/.local/share/chezmoi`。
+
+如果你是在更新这份 dotfiles 之前就已经打开了终端，重新执行一次：
+
 ```bash
-mise trust ~/.local/share/chezmoi/private_dot_config/mise/config.toml
+chezmoi apply
+exec $SHELL -l
 ```
+
+通常就会生效。
