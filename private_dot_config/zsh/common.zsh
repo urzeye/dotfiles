@@ -94,7 +94,7 @@ fco() {
   git switch $(echo "$branch" | sed "s/.* //" | sed "s#remotes/[^/]*/##")
 }
 
-# Delete local branches that are already merged into main.
+# Delete local branches that are already merged into a base branch.
 gbclean() {
   local base_branch="${1:-main}"
   local current_branch
@@ -108,8 +108,9 @@ gbclean() {
 
   current_branch=$(git branch --show-current)
   merged_branches=("${(@f)$(git for-each-ref --format='%(refname:short)' refs/heads --merged "$base_branch")}")
-  merged_branches=(${merged_branches:#$base_branch})
+  merged_branches=(${merged_branches:#main})
   merged_branches=(${merged_branches:#master})
+  merged_branches=(${merged_branches:#$base_branch})
   [ -n "$current_branch" ] && merged_branches=(${merged_branches:#$current_branch})
 
   if (( ${#merged_branches[@]} == 0 )); then
