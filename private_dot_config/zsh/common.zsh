@@ -30,6 +30,7 @@ alias jqp='jq -C -S'
 alias lg='lazygit'
 alias lssh='lazyssh'
 alias gst='git status'        # gst = git status
+alias gsw='git switch'        # gsw = git switch
 alias gcm='git commit -m'     # gcm = git commit message
 alias gp='git push'           # gp = git push
 alias gl='git pull'           # gl = git pull
@@ -91,6 +92,34 @@ fco() {
   local branch
   branch=$(git branch --all | grep -v "[*]" | fzf +m) &&
   git switch $(echo "$branch" | sed "s/.* //" | sed "s#remotes/[^/]*/##")
+}
+
+# Delete local branches that are already merged into main.
+gbclean() {
+  local base_branch="${1:-main}"
+  local current_branch
+  local -a merged_branches
+
+  git rev-parse --git-dir >/dev/null 2>&1 || { echo 'Not a git repository.'; return 1; }
+  git show-ref --verify --quiet "refs/heads/$base_branch" || {
+    echo "Local branch '$base_branch' not found."
+    return 1
+  }
+
+  current_branch=$(git branch --show-current)
+  merged_branches=("${(@f)$(git for-each-ref --format='%(refname:short)' refs/heads --merged "$base_branch")}")
+  merged_branches=(${merged_branches:#$base_branch})
+  merged_branches=(${merged_branches:#master})
+  [ -n "$current_branch" ] && merged_branches=(${merged_branches:#$current_branch})
+
+  if (( ${#merged_branches[@]} == 0 )); then
+    echo "No local branches merged into '$base_branch' to delete."
+    return 0
+  fi
+
+  echo "Deleting local branches merged into '$base_branch':"
+  printf '  %s\n' "${merged_branches[@]}"
+  git branch -d -- "${merged_branches[@]}"
 }
 
 # Use the writable local SSH config so lazyssh changes survive chezmoi apply.
