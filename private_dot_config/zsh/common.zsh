@@ -95,10 +95,14 @@ fco() {
 }
 
 # Delete local branches that are already merged into a base branch.
+# Git's --merged only catches ancestry-based merges, so we also use `gh` to
+# pick up squash-merged PR branches when it's available.
 gbc() {
   local base_branch="${1:-main}"
   local current_branch
-  local -a merged_branches
+  local branch
+  local -a merged_branches squash_merged_branches
+  local -A seen_branches
 
   git rev-parse --git-dir >/dev/null 2>&1 || { echo 'Not a git repository.'; return 1; }
   git show-ref --verify --quiet "refs/heads/$base_branch" || {
@@ -107,20 +111,47 @@ gbc() {
   }
 
   current_branch=$(git branch --show-current)
-  merged_branches=("${(@f)$(git for-each-ref --format='%(refname:short)' refs/heads --merged "$base_branch")}")
-  merged_branches=(${merged_branches:#main})
-  merged_branches=(${merged_branches:#master})
-  merged_branches=(${merged_branches:#$base_branch})
-  [ -n "$current_branch" ] && merged_branches=(${merged_branches:#$current_branch})
 
-  if (( ${#merged_branches[@]} == 0 )); then
+  for branch in "${(@f)$(git for-each-ref --format='%(refname:short)' refs/heads --merged "$base_branch")}"; do
+    [[ -z "$branch" ]] && continue
+    [[ "$branch" == main || "$branch" == master || "$branch" == "$base_branch" ]] && continue
+    [[ -n "$current_branch" && "$branch" == "$current_branch" ]] && continue
+
+    if (( ! ${+seen_branches[$branch]} )); then
+      seen_branches[$branch]=1
+      merged_branches+=("$branch")
+    fi
+  done
+
+  if command -v gh >/dev/null 2>&1; then
+    for branch in "${(@f)$(gh pr list --state merged --base "$base_branch" --limit 1000 --json headRefName --jq '.[].headRefName' 2>/dev/null)}"; do
+      [[ -z "$branch" ]] && continue
+      [[ "$branch" == main || "$branch" == master || "$branch" == "$base_branch" ]] && continue
+      [[ -n "$current_branch" && "$branch" == "$current_branch" ]] && continue
+
+      if (( ! ${+seen_branches[$branch]} )); then
+        seen_branches[$branch]=1
+        squash_merged_branches+=("$branch")
+      fi
+    done
+  fi
+
+  if (( ${#merged_branches[@]} == 0 && ${#squash_merged_branches[@]} == 0 )); then
     echo "No local branches merged into '$base_branch' to delete."
     return 0
   fi
 
-  echo "Deleting local branches merged into '$base_branch':"
-  printf '  %s\n' "${merged_branches[@]}"
-  git branch -d -- "${merged_branches[@]}"
+  if (( ${#merged_branches[@]} > 0 )); then
+    echo "Deleting local branches merged into '$base_branch':"
+    printf '  %s\n' "${merged_branches[@]}"
+    git branch -d -- "${merged_branches[@]}"
+  fi
+
+  if (( ${#squash_merged_branches[@]} > 0 )); then
+    echo "Force deleting squash-merged PR branches into '$base_branch':"
+    printf '  %s\n' "${squash_merged_branches[@]}"
+    git branch -D -- "${squash_merged_branches[@]}"
+  fi
 }
 
 # Use the writable local SSH config so lazyssh changes survive chezmoi apply.
